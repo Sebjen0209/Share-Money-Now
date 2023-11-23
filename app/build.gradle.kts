@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.share_money_now"
-    compileSdk = 34
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.example.share_money_now"
