@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "81521498610",
+    "project_id": "share-money-now",
+    "storage_bucket": "share-money-now.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:81521498610:android:b20d6cea62acf0b6e6b36b",
+        "android_client_info": {
+          "package_name": "com.example.share_money_now"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvIWjqDV4Z9ze51O_O2hhSSQ4CUMJRp0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
