@@ -106,6 +106,20 @@ fun LandingScreen(navController: NavController){
                 Text(text = "Add New Group")
             }
         }
+        var isButtonClicked by remember { mutableStateOf(false) }
+
+        // Display error message if newGroupName is empty and the button is clicked
+        if (newGroupName.isEmpty() && isButtonClicked) {
+            Text(
+                text = "Please enter a group name",
+                color = Color.Red,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                textAlign = TextAlign.Center
+            )
+        }
 
         // Text Field to Enter New Group Name
         if (isAddingGroup) {
@@ -122,10 +136,14 @@ fun LandingScreen(navController: NavController){
             Button(
                 onClick = {
                     // Handle button click to confirm and add the new group
-                    groups = groups + newGroupName
-                    newGroupName = ""
-                    isAddingGroup = false
-                    // navController.navigate(Screen.GroupScreen.route) /* NOT IMPLEMENTED YET */
+                    if (newGroupName.isNotEmpty()) {
+                        groups = groups + newGroupName
+                        newGroupName = ""
+                        isAddingGroup = false
+                        navController.navigate(Screen.GroupScreen.route)
+                    } else {
+                        isButtonClicked = true
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
