@@ -72,6 +72,7 @@ fun LandingScreen(navController: NavController){
                 .weight(1f)
         ) {
             items(groups) { group ->
+                var editableText by remember { mutableStateOf("100") }
                 Button(
                     onClick = {
                         navController.navigate(Screen.GroupScreen.route)
@@ -82,12 +83,12 @@ fun LandingScreen(navController: NavController){
                     colors = ButtonDefaults.buttonColors(Color.Transparent)
                 ) {
                     Text(
-                        text = group,
-                        color = Color.Black, // Set text color to black
-                        fontSize = 16.sp, // Adjust the text size as needed
+                        text = "$group    -    $editableText",
+                        color = Color.Black,
+                        fontSize = 16.sp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp), // Adjust the padding as needed
+                            .padding(16.dp),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -98,7 +99,6 @@ fun LandingScreen(navController: NavController){
         if (!isAddingGroup) {
             Button(
                 onClick = {
-                    // Handle button click to add a new group
                     isAddingGroup = true
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -135,7 +135,6 @@ fun LandingScreen(navController: NavController){
             // Button to Confirm New Group
             Button(
                 onClick = {
-                    // Handle button click to confirm and add the new group
                     if (newGroupName.isNotEmpty()) {
                         groups = groups + newGroupName
                         newGroupName = ""
