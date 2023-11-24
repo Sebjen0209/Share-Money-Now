@@ -24,10 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(navController: NavController){
     var userName by remember { mutableStateOf("John Doe") }
     var groups by remember { mutableStateOf(listOf("Group 1")) }
+    var newGroupName by remember { mutableStateOf("") }
+    var isAddingGroup by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -92,13 +95,42 @@ fun LandingScreen(navController: NavController){
         }
 
         // Button to Add New Group
-        Button(
-            onClick = {
-                // Handle button click to add a new group
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Add New Group")
+        if (!isAddingGroup) {
+            Button(
+                onClick = {
+                    // Handle button click to add a new group
+                    isAddingGroup = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Add New Group")
+            }
+        }
+
+        // Text Field to Enter New Group Name
+        if (isAddingGroup) {
+            OutlinedTextField(
+                value = newGroupName,
+                onValueChange = { newGroupName = it },
+                label = { Text("New Group Name") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Button to Confirm New Group
+            Button(
+                onClick = {
+                    // Handle button click to confirm and add the new group
+                    groups = groups + newGroupName
+                    newGroupName = ""
+                    isAddingGroup = false
+                    // navController.navigate(Screen.GroupScreen.route) /* NOT IMPLEMENTED YET */
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Add Group")
+            }
         }
     }
 }
