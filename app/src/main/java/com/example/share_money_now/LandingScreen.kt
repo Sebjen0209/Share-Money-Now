@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -22,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColor
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +74,8 @@ fun LandingScreen(navController: NavController){
                 .weight(1f)
         ) {
             items(groups) { group ->
-                var editableText by remember { mutableStateOf("100") }
+                var editableText by remember { mutableIntStateOf(100) }
+                val textColor = if (editableText < 0) Color.Red else Color.Green
                 Button(
                     onClick = {
                         navController.navigate(Screen.GroupScreen.route)
@@ -84,7 +87,7 @@ fun LandingScreen(navController: NavController){
                 ) {
                     Text(
                         text = "$group    -    $editableText",
-                        color = Color.Black,
+                        color = textColor,
                         fontSize = 16.sp,
                         modifier = Modifier
                             .fillMaxWidth()
