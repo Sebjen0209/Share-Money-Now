@@ -30,7 +30,7 @@ import androidx.navigation.NavController
 @Composable
 fun LandingScreen(navController: NavController){
     var userName by remember { mutableStateOf("John Doe") }
-    var groups by remember { mutableStateOf(listOf("Group 1")) }
+    var groups by remember { mutableStateOf(listOf("TEST")) }
     var newGroupName by remember { mutableStateOf("") }
     var isAddingGroup by remember { mutableStateOf(false) }
 
@@ -74,8 +74,8 @@ fun LandingScreen(navController: NavController){
                 .weight(1f)
         ) {
             items(groups) { group ->
-                var editableText by remember { mutableIntStateOf(100) }
-                val textColor = if (editableText < 0) Color.Red else Color.Green
+                var editableText by remember { mutableIntStateOf(0) }
+                val textColor = if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
                 Button(
                     onClick = {
                         navController.navigate(Screen.GroupScreen.route)
