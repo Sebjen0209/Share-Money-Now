@@ -74,8 +74,7 @@ fun LandingScreen(navController: NavController){
             items(groups) { group ->
                 Button(
                     onClick = {
-                        // Handle group button click
-                        // You can navigate to the group page or perform any other action
+                        navController.navigate(Screen.GroupScreen.route)
                     },
                     modifier = Modifier
                         .fillMaxWidth()

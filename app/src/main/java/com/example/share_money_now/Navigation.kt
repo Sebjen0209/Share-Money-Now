@@ -28,5 +28,9 @@ fun Navigation() {
         composable(route = Screen.UserScreen.route) {
             UserScreen(navController = navController)
         }
+
+        composable(route = Screen.GroupScreen.route) {
+            GroupScreen(navController = navController)
+        }
     }
 }
