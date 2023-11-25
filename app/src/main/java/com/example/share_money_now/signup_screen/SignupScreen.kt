@@ -92,7 +92,7 @@ fun SignupScreen(
             onClick = {
 
                 scope.launch {
-                    viewModel.registerUser(email, password)
+                    viewModel.registerUser(email, password, name)
                     navController.navigate(Screen.LandingScreen.route)
                 }
             },
