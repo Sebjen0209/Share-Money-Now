@@ -1,5 +1,6 @@
 package com.example.share_money_now
 
+import FirebaseManager
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,7 +25,7 @@ fun Navigation() {
         }
 
         composable(route = Screen.LandingScreen.route) {
-            LandingScreen(navController = navController)
+            LandingScreen(navController = navController, firebaseManager = FirebaseManager())
         }
 
         composable(route = Screen.UserScreen.route) {

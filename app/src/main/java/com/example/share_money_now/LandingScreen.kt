@@ -1,5 +1,6 @@
 package com.example.share_money_now
 
+import FirebaseManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,11 +26,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.share_money_now.data_classes.Group
 import com.google.firebase.auth.FirebaseAuth
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LandingScreen(navController: NavController) {
+fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager) {
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
     var groups by remember { mutableStateOf(listOf("Group 1")) }
     var newGroupName by remember { mutableStateOf("") }
@@ -157,6 +160,8 @@ fun LandingScreen(navController: NavController) {
             // Button to Confirm New Group
             Button(
                 onClick = {
+                    val group = Group(UUID.randomUUID().toString(), newGroupName, emptyList())
+                    firebaseManager.createGroup(group)
                     if (newGroupName.isNotEmpty()) {
                         groups = groups + newGroupName
                         newGroupName = ""

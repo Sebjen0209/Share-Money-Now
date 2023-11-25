@@ -1,4 +1,5 @@
 package com.example.share_money_now
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -60,7 +61,11 @@ fun GroupScreen(navController: NavController) {
                     ParticipantRow(
                         name = participants[index],
                         debt = 50.0, // Replace with actual debt value
-                        onRemoveClick = { /* Handle remove participant click */ }
+                        onRemoveClick = {
+                            participants = participants.toMutableList().apply {
+                                removeAt(index)
+                            }
+                        }
                     )
                 }
             }
@@ -128,4 +133,10 @@ fun ParticipantRow(name: String, debt: Double, onRemoveClick: () -> Unit) {
             Text(text = "Remove")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewGroupScreen() {
+    // Preview code here
 }
