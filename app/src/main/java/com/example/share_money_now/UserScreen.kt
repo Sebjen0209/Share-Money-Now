@@ -1,6 +1,5 @@
 package com.example.share_money_now
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,12 +22,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun UserScreen(navController: NavController) {
-    var userName by remember { mutableStateOf("John Doe") }
-    var userEmail by remember { mutableStateOf("john.doe@example.com") }
+    var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
+    var userEmail by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.email) }
     var userPassword by remember { mutableStateOf("********") }
+    var newDebtUpdatesEnabled by remember { mutableStateOf(true) }
+    var groupUpdatesEnabled by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
@@ -58,10 +62,10 @@ fun UserScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Left side (Labels)
-            Column (verticalArrangement = Arrangement.spacedBy(16.dp)){
-                Text(text = "Name:", fontSize = 20.sp) // Adjust the text size as needed
-                Text(text = "Email:", fontSize = 20.sp) // Adjust the text size as needed
-                Text(text = "Password:", fontSize = 20.sp) // Adjust the text size as needed
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(text = "Name:", fontSize = 20.sp)
+                Text(text = "Email:", fontSize = 20.sp)
+                Text(text = "Password:", fontSize = 20.sp)
             }
 
             // Spacer
@@ -69,9 +73,9 @@ fun UserScreen(navController: NavController) {
 
             // Right side (Values)
             Column (verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(text = userName, fontSize = 20.sp) // Adjust the text size as needed
-                Text(text = userEmail, fontSize = 20.sp) // Adjust the text size as needed
-                Text(text = userPassword, fontSize = 20.sp) // Adjust the text size as needed
+                userName?.let { Text(text = it, fontSize = 20.sp) }
+                userEmail?.let { Text(text = it, fontSize = 20.sp) }
+                Text(text = userPassword, fontSize = 20.sp)
             }
         }
 
@@ -85,6 +89,52 @@ fun UserScreen(navController: NavController) {
                 .padding(top = 16.dp)
         ) {
             Text(text = "Change Password")
+        }
+
+
+        // New Debt and Group Updates
+        Text(
+            text = "Notification Settings",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "New Debt Updates", fontSize = 18.sp)
+            Switch(
+                checked = newDebtUpdatesEnabled,
+                onCheckedChange = {
+                    newDebtUpdatesEnabled = it
+                    // Handle switch state change for New Debt Updates
+                }
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Group Updates", fontSize = 18.sp)
+            Switch(
+                checked = groupUpdatesEnabled,
+                onCheckedChange = {
+                    groupUpdatesEnabled = it
+                    // Handle switch state change for Group Updates
+                }
+            )
         }
     }
 }

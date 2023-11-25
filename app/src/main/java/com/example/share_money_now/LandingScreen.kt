@@ -23,14 +23,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColor
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(navController: NavController){
-    var userName by remember { mutableStateOf("John Doe") }
-    var groups by remember { mutableStateOf(listOf("TEST")) }
+    var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
+    var groups by remember { mutableStateOf(listOf("Group 1")) }
     var newGroupName by remember { mutableStateOf("") }
     var isAddingGroup by remember { mutableStateOf(false) }
 
@@ -58,13 +58,15 @@ fun LandingScreen(navController: NavController){
                 .padding(bottom = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent)
         ) {
-            Text(
-                text = userName,
-                color = Color.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center
+            userName?.let {
+                Text(
+                    text = it,
+                    color = Color.Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
 
-            )
+                )
+            }
         }
 
         // Group List
