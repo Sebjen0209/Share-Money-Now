@@ -27,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.database
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -160,7 +162,12 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
             // Button to Confirm New Group
             Button(
                 onClick = {
-                    val group = Group(UUID.randomUUID().toString(), newGroupName, emptyList())
+                    val group = Group(
+                        UUID.randomUUID().toString(),
+                        FirebaseAuth.getInstance().currentUser?.email.toString(),
+                        newGroupName,
+                        emptyList()
+                    )
                     firebaseManager.createGroup(group)
                     if (newGroupName.isNotEmpty()) {
                         groups = groups + newGroupName
