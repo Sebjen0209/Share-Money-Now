@@ -1,5 +1,6 @@
 package com.example.share_money_now
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
+import java.io.Console
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(navController: NavController) {
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
@@ -70,22 +75,29 @@ fun UserScreen(navController: NavController) {
 
             // Right side (Values)
             Column (verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(text = userName.toString(), fontSize = 20.sp)
-                Text(text = userEmail.toString(), fontSize = 20.sp)
+                OutlinedTextField(
+                    value = userName ?: "",
+                    onValueChange = {userName = it},
+                    label = {Text("New Username")},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+                userEmail?.let { Text(text = it, fontSize = 20.sp) }
                 Text(text = userPassword, fontSize = 20.sp)
             }
         }
 
-        // Button to Change Password
+        // Button to update username
         Button(
             onClick = {
-                // Handle button click to change password
+                updateFirebaseUsername(userName ?: "")
             },
             modifier = Modifier
                 .width(200.dp)
                 .padding(top = 16.dp)
         ) {
-            Text(text = "Change Password")
+            Text(text = "Update Information")
         }
 
 
@@ -132,6 +144,23 @@ fun UserScreen(navController: NavController) {
                     // Handle switch state change for Group Updates
                 }
             )
+        }
+    }
+}
+
+fun updateFirebaseUsername(newName: String){
+    val user = FirebaseAuth.getInstance().currentUser
+    val profileUpdater = UserProfileChangeRequest.Builder()
+        .setDisplayName(newName)
+        .build()
+
+    user?.updateProfile(profileUpdater)
+        ?.addOnCompleteListener { task -> if (task.isSuccessful) {
+            if (task.isSuccessful) {
+                println("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
+            }
+        } else {
+            println("NEJSAEIHUDANSKJDHJKASHNKDAsæd")
         }
     }
 }
