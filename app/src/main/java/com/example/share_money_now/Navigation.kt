@@ -10,7 +10,7 @@ import com.example.share_money_now.signup_screen.SignupScreen
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.LandingScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.WelcomeScreen.route) {
         composable(route = Screen.WelcomeScreen.route){
             WelcomeScreen(navController = navController)
         }
