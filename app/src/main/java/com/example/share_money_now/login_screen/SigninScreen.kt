@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.Screen
-import com.example.share_money_now.signup_screen.SignUpViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,6 +84,7 @@ fun SigninScreen(
                     viewModel.loginUser(email, password)
                     navController.navigate(Screen.LandingScreen.route)
                 }
+
 
             },
             modifier = Modifier.fillMaxWidth()

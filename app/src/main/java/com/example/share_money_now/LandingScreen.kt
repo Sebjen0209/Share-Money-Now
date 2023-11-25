@@ -59,15 +59,13 @@ fun LandingScreen(navController: NavController) {
                 .padding(bottom = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent)
         ) {
-            userName?.let {
                 Text(
-                    text = it,
+                    text = userName.toString(),
                     color = Color.Black,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center
 
                 )
-            }
         }
 
         // Group List
@@ -96,7 +94,6 @@ fun LandingScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // First Text with the value of "group"
                         Text(
                             text = group + "    -  ",
                             color = Color.Black,
@@ -104,8 +101,6 @@ fun LandingScreen(navController: NavController) {
                             modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
                             textAlign = TextAlign.Center
                         )
-
-                        // Second Text with the value of "editableText" and different color
                         Text(
                             text = editableText.toString(),
                             color = textColor,

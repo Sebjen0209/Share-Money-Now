@@ -16,15 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun UserScreen(navController: NavController) {
@@ -73,8 +70,8 @@ fun UserScreen(navController: NavController) {
 
             // Right side (Values)
             Column (verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                userName?.let { Text(text = it, fontSize = 20.sp) }
-                userEmail?.let { Text(text = it, fontSize = 20.sp) }
+                Text(text = userName.toString(), fontSize = 20.sp)
+                Text(text = userEmail.toString(), fontSize = 20.sp)
                 Text(text = userPassword, fontSize = 20.sp)
             }
         }
