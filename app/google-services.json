@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "81521498610",
+    "firebase_url": "https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "share-money-now",
     "storage_bucket": "share-money-now.appspot.com"
   },

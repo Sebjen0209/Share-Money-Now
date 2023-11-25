@@ -3,6 +3,7 @@ buildscript {
         classpath("com.google.gms:google-services:4.4.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31")
         classpath("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:1.8.0-1.0.9")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.9")
     }
 }
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
