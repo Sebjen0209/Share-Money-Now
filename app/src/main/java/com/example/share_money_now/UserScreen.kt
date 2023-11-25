@@ -1,6 +1,5 @@
 package com.example.share_money_now
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +31,8 @@ fun UserScreen(navController: NavController) {
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
     var userEmail by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.email) }
     var userPassword by remember { mutableStateOf("********") }
+    var newDebtUpdatesEnabled by remember { mutableStateOf(true) }
+    var groupUpdatesEnabled by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
@@ -61,7 +62,7 @@ fun UserScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Left side (Labels)
-            Column (verticalArrangement = Arrangement.spacedBy(16.dp)){
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(text = "Name:", fontSize = 20.sp)
                 Text(text = "Email:", fontSize = 20.sp)
                 Text(text = "Password:", fontSize = 20.sp)
@@ -88,6 +89,52 @@ fun UserScreen(navController: NavController) {
                 .padding(top = 16.dp)
         ) {
             Text(text = "Change Password")
+        }
+
+
+        // New Debt and Group Updates
+        Text(
+            text = "Notification Settings",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "New Debt Updates", fontSize = 18.sp)
+            Switch(
+                checked = newDebtUpdatesEnabled,
+                onCheckedChange = {
+                    newDebtUpdatesEnabled = it
+                    // Handle switch state change for New Debt Updates
+                }
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Group Updates", fontSize = 18.sp)
+            Switch(
+                checked = groupUpdatesEnabled,
+                onCheckedChange = {
+                    groupUpdatesEnabled = it
+                    // Handle switch state change for Group Updates
+                }
+            )
         }
     }
 }
