@@ -93,6 +93,7 @@ fun SignupScreen(
 
                 scope.launch {
                     viewModel.registerUser(email, password)
+                    navController.navigate(Screen.LandingScreen.route)
                 }
             },
             modifier = Modifier.fillMaxWidth()

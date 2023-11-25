@@ -83,6 +83,7 @@ fun SigninScreen(
 
                 scope.launch {
                     viewModel.loginUser(email, password)
+                    navController.navigate(Screen.LandingScreen.route)
                 }
 
             },
