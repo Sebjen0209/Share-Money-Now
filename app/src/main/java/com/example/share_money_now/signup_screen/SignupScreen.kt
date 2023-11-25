@@ -1,4 +1,4 @@
-package com.example.share_money_now
+package com.example.share_money_now.signup_screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,15 +22,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.share_money_now.Screen
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SigninScreen(navController: NavController) {
-    val context = LocalContext.current
+fun SignupScreen(
+    navController: NavController,
+    viewModel: SignUpViewModel = hiltViewModel()
+) {
 
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val state = viewModel.signUpState.collectAsState(initial = null)
 
     Column(
         modifier = Modifier
@@ -39,10 +50,20 @@ fun SigninScreen(navController: NavController) {
     ) {
         // Welcome Text
         Text(
-            text = "Sign In",
+            text = "Sign Up",
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
             modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // Name TextField
+        TextField(
+            value = name,
+            onValueChange = { name = it },
+            placeholder = { Text("Name") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         )
 
         // Email TextField
@@ -66,24 +87,27 @@ fun SigninScreen(navController: NavController) {
                 .padding(bottom = 8.dp)
         )
 
-        // Sign In Button
+        // Sign Up Button
         Button(
             onClick = {
-                navController.navigate(Screen.LandingScreen.route)
-                println("Email: $email, Password: $password")
+
+                scope.launch {
+                    viewModel.registerUser(email, password, name)
+                    navController.navigate(Screen.LandingScreen.route)
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Sign In")
+            Text(text = "Sign up")
         }
 
-        // Don't have an account? Sign Up
+        // Already have an account? Sign In
         Text(
-            text = "Don't have an account? Sign Up",
+            text = "Already have an account? Sign In",
             color = Color.Gray,
             modifier = Modifier
                 .clickable {
-                    navController.navigate(Screen.SignupScreen.route)
+                    navController.navigate(Screen.SigninScreen.route)
                 }
                 .padding(16.dp)
         )

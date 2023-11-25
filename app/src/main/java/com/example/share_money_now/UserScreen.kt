@@ -22,11 +22,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun UserScreen(navController: NavController) {
-    var userName by remember { mutableStateOf("John Doe") }
-    var userEmail by remember { mutableStateOf("john.doe@example.com") }
+    var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
+    var userEmail by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.email) }
     var userPassword by remember { mutableStateOf("********") }
     var newDebtUpdatesEnabled by remember { mutableStateOf(true) }
     var groupUpdatesEnabled by remember { mutableStateOf(true) }
@@ -69,9 +72,9 @@ fun UserScreen(navController: NavController) {
             Spacer(modifier = Modifier.width(16.dp))
 
             // Right side (Values)
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(text = userName, fontSize = 20.sp)
-                Text(text = userEmail, fontSize = 20.sp)
+            Column (verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                userName?.let { Text(text = it, fontSize = 20.sp) }
+                userEmail?.let { Text(text = it, fontSize = 20.sp) }
                 Text(text = userPassword, fontSize = 20.sp)
             }
         }
