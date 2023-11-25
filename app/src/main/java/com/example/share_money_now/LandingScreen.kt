@@ -3,6 +3,7 @@ package com.example.share_money_now
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,7 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LandingScreen(navController: NavController){
+fun LandingScreen(navController: NavController) {
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
     var groups by remember { mutableStateOf(listOf("Group 1")) }
     var newGroupName by remember { mutableStateOf("") }
@@ -58,15 +59,13 @@ fun LandingScreen(navController: NavController){
                 .padding(bottom = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent)
         ) {
-            userName?.let {
                 Text(
-                    text = it,
+                    text = userName.toString(),
                     color = Color.Black,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center
 
                 )
-            }
         }
 
         // Group List
@@ -76,8 +75,9 @@ fun LandingScreen(navController: NavController){
                 .weight(1f)
         ) {
             items(groups) { group ->
-                var editableText by remember { mutableIntStateOf(0) }
-                val textColor = if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
+                var editableText by remember { mutableIntStateOf(100) }
+                val textColor =
+                    if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
                 Button(
                     onClick = {
                         navController.navigate(Screen.GroupScreen.route)
@@ -87,15 +87,27 @@ fun LandingScreen(navController: NavController){
                         .padding(bottom = 16.dp),
                     colors = ButtonDefaults.buttonColors(Color.Transparent)
                 ) {
-                    Text(
-                        text = "$group    -    $editableText",
-                        color = textColor,
-                        fontSize = 16.sp,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        textAlign = TextAlign.Center
-                    )
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = group + "    -  ",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = editableText.toString(),
+                            color = textColor,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
