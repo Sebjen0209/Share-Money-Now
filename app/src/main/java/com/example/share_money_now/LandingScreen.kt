@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -75,6 +76,8 @@ fun LandingScreen(navController: NavController){
                 .weight(1f)
         ) {
             items(groups) { group ->
+                var editableText by remember { mutableIntStateOf(0) }
+                val textColor = if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
                 Button(
                     onClick = {
                         navController.navigate(Screen.GroupScreen.route)
@@ -85,12 +88,12 @@ fun LandingScreen(navController: NavController){
                     colors = ButtonDefaults.buttonColors(Color.Transparent)
                 ) {
                     Text(
-                        text = group,
-                        color = Color.Black, // Set text color to black
-                        fontSize = 16.sp, // Adjust the text size as needed
+                        text = "$group    -    $editableText",
+                        color = textColor,
+                        fontSize = 16.sp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp), // Adjust the padding as needed
+                            .padding(16.dp),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -101,13 +104,26 @@ fun LandingScreen(navController: NavController){
         if (!isAddingGroup) {
             Button(
                 onClick = {
-                    // Handle button click to add a new group
                     isAddingGroup = true
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Add New Group")
             }
+        }
+        var isButtonClicked by remember { mutableStateOf(false) }
+
+        // Display error message if newGroupName is empty and the button is clicked
+        if (newGroupName.isEmpty() && isButtonClicked) {
+            Text(
+                text = "Please enter a group name",
+                color = Color.Red,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                textAlign = TextAlign.Center
+            )
         }
 
         // Text Field to Enter New Group Name
@@ -124,11 +140,14 @@ fun LandingScreen(navController: NavController){
             // Button to Confirm New Group
             Button(
                 onClick = {
-                    // Handle button click to confirm and add the new group
-                    groups = groups + newGroupName
-                    newGroupName = ""
-                    isAddingGroup = false
-                    // navController.navigate(Screen.GroupScreen.route) /* NOT IMPLEMENTED YET */
+                    if (newGroupName.isNotEmpty()) {
+                        groups = groups + newGroupName
+                        newGroupName = ""
+                        isAddingGroup = false
+                        navController.navigate(Screen.GroupScreen.route)
+                    } else {
+                        isButtonClicked = true
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
