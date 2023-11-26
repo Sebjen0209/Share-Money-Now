@@ -45,7 +45,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
     val groups by viewModel.items.observeAsState(emptyList())
 
     LaunchedEffect(Unit){
-        viewModel.getItemsById(FirebaseAuth.getInstance().currentUser?.email.toString())
+        viewModel.getItemsById(FirebaseAuth.getInstance().currentUser?.email.toString(), "")
     }
 
     Column(

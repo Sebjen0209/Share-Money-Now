@@ -10,13 +10,15 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
 class CreateGroupViewModel : ViewModel() {
-    private val databaseReference = FirebaseDatabase.getInstance("https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app").getReference("groups")
+    private val databaseReference = FirebaseDatabase.getInstance("https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app")
+
+
 
     private val _groups = MutableLiveData<List<Group>>()
     val items: LiveData<List<Group>> get() = _groups
 
-    fun getItemsById(groupOwnerId: String) {
-        val query = databaseReference.orderByChild("ownerId").equalTo(groupOwnerId)
+    fun getItemsById(groupOwnerId: String, personEmail: String) {
+        val query = databaseReference.getReference("groups").orderByChild("ownerId").equalTo(groupOwnerId)
 
         query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

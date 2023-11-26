@@ -29,7 +29,7 @@ fun Navigation() {
         }
 
         composable(route = Screen.SignupScreen.route) {
-            SignupScreen(navController = navController)
+            SignupScreen(navController = navController, firebaseManager = FirebaseManager())
         }
 
         composable(route = Screen.LandingScreen.route) {

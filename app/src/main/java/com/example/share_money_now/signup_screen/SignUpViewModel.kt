@@ -2,6 +2,7 @@ package com.example.share_money_now.signup_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.share_money_now.data_classes.Person
 import com.example.share_money_now.firebaseauth.data.AuthRepository
 import com.example.share_money_now.firebaseauth.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel

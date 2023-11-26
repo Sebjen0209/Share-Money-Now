@@ -25,4 +25,9 @@ class FirebaseManager {
         val groupReference = databaseReference.child("groups").child(groupId).child("members").child(personId)
         groupReference.removeValue()
     }
+
+    fun addPersonOnSignUp(person: Person){
+        val personReference = databaseReference.child("persons").push()
+        personReference.setValue(person)
+    }
 }
