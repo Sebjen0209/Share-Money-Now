@@ -142,7 +142,6 @@ fun GroupScreen(navController: NavController) {
                                 keyboardActions = KeyboardActions(
                                     onDone = {
                                         showDialog = false
-                                        // Hide the keyboard when the "Done" action is triggered
                                         keyboardController?.hide()
                                     }
                                 ),
@@ -176,7 +175,9 @@ fun GroupScreen(navController: NavController) {
 
                                 TextButton(
                                     onClick = {
-                                        // Perform the action of adding people (e.g., save to Firebase)
+                                        participants = participants.toMutableList().apply {
+                                            add(textFieldValue.text)
+                                        }
                                         showDialog = false
                                         // Hide the keyboard when the "Add" button is clicked
                                         keyboardController?.hide()
