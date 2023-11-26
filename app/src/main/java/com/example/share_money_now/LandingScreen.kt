@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,9 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.database
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +40,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
     var newGroupName by remember { mutableStateOf("") }
     var isAddingGroup by remember { mutableStateOf(false) }
     val groups by viewModel.items.observeAsState(emptyList())
+    var groupDescription by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit){
         viewModel.getItemsById(FirebaseAuth.getInstance().currentUser?.email.toString(), "")
@@ -96,7 +94,8 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                         if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
                     Button(
                         onClick = {
-                            navController.navigate(Screen.GroupScreen.route)
+                            val groupId = item.id
+                            navController.navigate("group_screen/$groupId")
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -169,7 +168,14 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
-
+            OutlinedTextField(
+                value = groupDescription,
+                onValueChange = { groupDescription = it },
+                label = { Text("Group Description") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
             // Button to Confirm New Group
             Button(
                 onClick = {
@@ -177,14 +183,15 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                         UUID.randomUUID().toString(),
                         FirebaseAuth.getInstance().currentUser?.email.toString(),
                         newGroupName,
-                        emptyList()
+                        emptyList(),
+                        groupDescription
                     )
                     firebaseManager.createGroup(group)
                     if (newGroupName.isNotEmpty()) {
                         //groups = groups + newGroupName
                         newGroupName = ""
                         isAddingGroup = false
-                        navController.navigate(Screen.GroupScreen.route)
+                        navController.navigate("group_screen/${group.id}")
                     } else {
                         isButtonClicked = true
                     }

@@ -1,54 +1,98 @@
 package com.example.share_money_now
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import FirebaseManager
+import PersonalGroupViewModel
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.contentColorFor
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.share_money_now.data_classes.Group
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun GroupScreen(navController: NavController) {
+fun GroupScreen(navController: NavController, groupId: String?,
+                firebaseManager: FirebaseManager,
+                viewModel: PersonalGroupViewModel = viewModel()
+) {
     var groupName by remember { mutableStateOf("Group Name") }
     var totalAmount by remember { mutableStateOf(1000.0) }
     var participants by remember { mutableStateOf(listOf("Participant 1", "Participant 2")) }
     var description by remember { mutableStateOf("Group Description") }
     var showDialog by remember { mutableStateOf(false) }
     var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
+    var group by remember { mutableStateOf(Group()) }
+    val gId = groupId.toString()
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val personalGroupViewModel = viewModel<PersonalGroupViewModel>()
+
+    LaunchedEffect(Unit) {
+        personalGroupViewModel.findGroupByGroupId(gId) { firebaseGroupId ->
+            if (firebaseGroupId != null) {
+                personalGroupViewModel.fetchGroupDetails(firebaseGroupId) { fetchedGroup ->
+                    if (fetchedGroup != null) {
+                        group = fetchedGroup // Update the 'group' variable with fetched data
+                    } else {
+                        // Handle scenario when group data is null or not found
+                    }
+                }
+            } else {
+                // Handle scenario when groupId is not found
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = groupName) },
+                title = { Text(text = group.name) },
                 actions = {
                     Button(onClick = { /* Handle edit button click */ }) {
                         Text(text = "Edit")
                     }
                 }
             )
+            println(group.name)
+            println(group.id)
+            println(group.ownerId)
         }
     ) { innerPadding ->
         Column(
@@ -83,7 +127,7 @@ fun GroupScreen(navController: NavController) {
 
             // Description
             Text(
-                text = "Description: $description",
+                text = "Description: ${group.description}",
             )
 
             // Edit Button

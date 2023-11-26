@@ -1,6 +1,11 @@
+
 import com.example.share_money_now.data_classes.Group
 import com.example.share_money_now.data_classes.Person
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class FirebaseManager {
     private val databaseReference: DatabaseReference
@@ -29,5 +34,21 @@ class FirebaseManager {
     fun addPersonOnSignUp(person: Person){
         val personReference = databaseReference.child("persons").push()
         personReference.setValue(person)
+    }
+
+    fun fetchGroupDetails(groupId: String, onDataReceived: (Group?) -> Unit) {
+        val groupsRef = databaseReference.child("groups").orderByChild("id").equalTo(groupId)
+
+        groupsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val groupData = snapshot.getValue(Group::class.java)
+                onDataReceived(groupData)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle database error
+                onDataReceived(null)
+            }
+        })
     }
 }
