@@ -136,5 +136,17 @@ fun UserScreen(navController: NavController) {
                 }
             )
         }
+        // Button to Change Password
+        Button(
+            onClick = {
+                FirebaseAuth.getInstance().signOut()
+                navController.navigate(Screen.WelcomeScreen.route)
+            },
+            modifier = Modifier
+                .width(200.dp)
+                .padding(top = 16.dp)
+        ) {
+            Text(text = "Log Out")
+        }
     }
 }

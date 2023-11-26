@@ -13,7 +13,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
 import com.google.firebase.Firebase
@@ -34,11 +37,16 @@ import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager) {
+fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager,
+                  viewModel: CreateGroupViewModel = viewModel()) {
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
-    var groups by remember { mutableStateOf(listOf("Group 1")) }
     var newGroupName by remember { mutableStateOf("") }
     var isAddingGroup by remember { mutableStateOf(false) }
+    val groups by viewModel.items.observeAsState(emptyList())
+
+    LaunchedEffect(Unit){
+        viewModel.getItemsById(FirebaseAuth.getInstance().currentUser?.email.toString())
+    }
 
     Column(
         modifier = Modifier
@@ -81,46 +89,49 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            items(groups) { group ->
-                var editableText by remember { mutableIntStateOf(100) }
-                val textColor =
-                    if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
-                Button(
-                    onClick = {
-                        navController.navigate(Screen.GroupScreen.route)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    colors = ButtonDefaults.buttonColors(Color.Transparent)
-                ) {
-                    Row(
+            groups.forEach { item ->
+                item {
+                    var editableText by remember { mutableIntStateOf(100) }
+                    val textColor =
+                        if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
+                    Button(
+                        onClick = {
+                            navController.navigate(Screen.GroupScreen.route)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(bottom = 16.dp),
+                        colors = ButtonDefaults.buttonColors(Color.Transparent)
                     ) {
-                        // First Text with the value of "group"
-                        Text(
-                            text = group + "    -  ",
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // First Text with the value of "group"
+                            Text(
+                                text = item.name + "    -  ",
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
+                                textAlign = TextAlign.Center
+                            )
 
-                        // Second Text with the value of "editableText" and different color
-                        Text(
-                            text = editableText.toString(),
-                            color = textColor,
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center
-                        )
+                            // Second Text with the value of "editableText" and different color
+                            Text(
+                                text = editableText.toString(),
+                                color = textColor,
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
         }
+
 
         // Button to Add New Group
         if (!isAddingGroup) {
@@ -170,7 +181,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                     )
                     firebaseManager.createGroup(group)
                     if (newGroupName.isNotEmpty()) {
-                        groups = groups + newGroupName
+                        //groups = groups + newGroupName
                         newGroupName = ""
                         isAddingGroup = false
                         navController.navigate(Screen.GroupScreen.route)
