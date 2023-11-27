@@ -261,17 +261,103 @@ fun GroupScreen(navController: NavController, groupId: String?,
             }
 
             // Add People Button
+            var paymentAmount by remember { mutableStateOf(0.0) }
+            // Pay Button
             Button(
                 onClick = {
-                    showDialog = true
-                    keyboardController?.show()
-                          },
+                    // Show a dialog or UI element to enter the payment amount
+                    showDialogExpense = true
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.secondary)
-                    .padding(8.dp)
+                    .padding(vertical = 8.dp)
             ) {
-                Text(text = "Add People")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(text = "Pay My Part")
+                }
+            }
+
+// ...
+
+// Inside your composable function
+
+            if (showDialogExpense) {
+                Dialog(
+                    onDismissRequest = {
+                        showDialogExpense = false
+                    },
+                    content = {
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Enter Payment Amount",
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = paymentAmount.toString(),
+                                onValueChange = {
+                                    // Handle the case where the input is not a valid double
+                                    paymentAmount = it.toDoubleOrNull() ?: 0.0
+                                },
+                                label = { Text("Payment Amount") },
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Number
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        // Dismiss the dialog without processing the input
+                                        showDialogExpense = false
+                                    }
+                                ) {
+                                    Text(text = "Cancel")
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                TextButton(
+                                    onClick = {
+                                        // Update the paidAmount in the database with the entered paymentAmount
+                                        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
+                                        if (currentUserEmail != null) {
+                                            val cleanEmail = currentUserEmail.replace(".", "")
+                                            val updatedPaidAmount = group.paidAmount.toMutableMap().apply {
+                                                val currentAmount = getOrDefault(cleanEmail, 0.0)
+                                                put(cleanEmail, currentAmount + paymentAmount)
+                                            }
+                                            group = group.copy(paidAmount = updatedPaidAmount)
+                                            personalGroupViewModel.updateGroupInFirebase(group)
+
+                                            // Reset the paymentAmount and dismiss the dialog
+                                            paymentAmount = 0.0
+                                            showDialogExpense = false
+                                        }
+                                    }
+                                ) {
+                                    Text(text = "OK")
+                                }
+                            }
+                        }
+                    }
+                )
             }
 
             // Dialog for adding people
@@ -354,6 +440,13 @@ fun GroupScreen(navController: NavController, groupId: String?,
                                                         // Use the associated name when creating the new Person
                                                         val newPerson = Person(emailToAdd, associatedName)
                                                         group = group.copy(members = group.members + newPerson)
+
+                                                        val updatedPaidAmount = group.paidAmount.toMutableMap().apply {
+                                                            put((emailToAdd.toString()).replace(".",""), 0.0)  // Assuming you want to initialize the new user with 0.0 paidAmount
+                                                        }
+
+                                                        group = group.copy(paidAmount = updatedPaidAmount)
+
 
                                                         // Update the group in the Firebase Realtime Database
                                                         personalGroupViewModel.updateGroupInFirebase(group)
