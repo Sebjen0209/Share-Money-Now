@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -40,6 +43,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -50,7 +55,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
-import com.example.share_money_now.data_classes.Payment
 import com.example.share_money_now.data_classes.Person
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.absoluteValue
@@ -67,6 +71,7 @@ fun GroupScreen(navController: NavController,
     var totalAmount by remember { mutableStateOf(0.0) }
     var participants by remember { mutableStateOf(listOf("")) }
     var showDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
     var showDialogExpense by remember { mutableStateOf(false) }
     var showDialogPay by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf<Double?>(null) }
@@ -139,15 +144,26 @@ fun GroupScreen(navController: NavController,
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(
-                    text = group.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.Center)
-                ) },
+                title = {
+                    Text(
+                        text = group.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentSize(Alignment.Center)
+                    )
+                },
                 actions = {
-                    Button(onClick = { /* Handle edit button click */ }) {
-                        Text(text = "Edit")
+                    IconButton(
+                        onClick = {
+                            showEditDialog = true
+                            keyboardController?.show()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.edit_text),
+                            contentDescription = stringResource(id = R.string.edit_button),
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             )
@@ -241,7 +257,7 @@ fun GroupScreen(navController: NavController,
                         onRemoveClick = {
                             val emailToRemove = participants.getOrNull(index) ?: ""
                             val indexToRemove =
-                                group.members.indexOfFirst { it?.name ?: "" == emailToRemove }
+                                group.members.indexOfFirst { (it?.name ?: "") == emailToRemove }
 
                             if (indexToRemove != -1) {
                                 // Email is registered and found in the members list
@@ -269,28 +285,6 @@ fun GroupScreen(navController: NavController,
             Text(
                 text = "Description: ${group.description}",
             )
-
-            // View Group Expense Button
-            Button(
-                onClick = {
-                          navController.navigate(Screen.ExpensesScreen.route)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(text = "View group expenses")
-            }
-
-            // Edit Button
-            Button(
-                onClick = { /* Handle edit button click */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(text = "Edit")
-            }
 
             // Share group expenses Button
             Button(
@@ -391,7 +385,6 @@ fun GroupScreen(navController: NavController,
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -491,6 +484,79 @@ fun GroupScreen(navController: NavController,
                     .padding(vertical = 8.dp)
             ) {
                 Text(text = "Add people")
+            }
+
+            if (showEditDialog) {
+                Dialog(
+                    onDismissRequest = {
+                        showEditDialog = false
+                        keyboardController?.hide()
+                    },
+                    content = {
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Change Group Name",
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = textFieldValue,
+                                onValueChange = {
+                                    textFieldValue = it
+                                },
+                                label = { Text("New Group Name") },
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        group = group.copy(name = textFieldValue.text)
+                                        personalGroupViewModel.updateGroupInFirebase(group)
+                                        showEditDialog = false
+                                        keyboardController?.hide()
+                                    }
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        showEditDialog = false
+                                        keyboardController?.hide()
+                                    }
+                                ) {
+                                    Text(text = "Cancel")
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                TextButton(
+                                    onClick = {
+                                        group = group.copy(name = textFieldValue.text)
+                                        personalGroupViewModel.updateGroupInFirebase(group)
+                                        showEditDialog = false
+                                        keyboardController?.hide()
+                                    }
+                                ) {
+                                    Text(text = "Save")
+                                }
+                            }
+                        }
+                    }
+                )
             }
 
             // Dialog for adding people

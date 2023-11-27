@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Share-Money-Now</string>
+    <string name="app_name">Share Money Now</string>
+    <string name="edit_button">Edit</string>
 </resources>
