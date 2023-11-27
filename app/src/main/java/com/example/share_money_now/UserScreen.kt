@@ -31,11 +31,13 @@ import java.io.Console
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(navController: NavController) {
+    // Retrieve user information from Firebase
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
     var userEmail by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.email) }
     var userPassword by remember { mutableStateOf("********") }
     var newDebtUpdatesEnabled by remember { mutableStateOf(true) }
     var groupUpdatesEnabled by remember { mutableStateOf(true) }
+    var isEditing by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -64,34 +66,47 @@ fun UserScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left side (Labels)
+            // Left side (Labels or TextFields based on isEditing)
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(text = "Name:", fontSize = 20.sp)
-                Text(text = "Email:", fontSize = 20.sp)
-                Text(text = "Password:", fontSize = 20.sp)
+                if (isEditing) {
+                    // Editable TextField for Name
+                    OutlinedTextField(
+                        value = userName ?: "",
+                        onValueChange = { userName = it },
+                        label = { Text("Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Editable TextField for Email
+                    OutlinedTextField(
+                        value = userEmail ?: "",
+                        onValueChange = { userEmail = it },
+                        label = { Text("Email") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    // Display current user information as Text components
+                    Text(text = "Name: $userName", fontSize = 20.sp)
+                    Text(text = "Email: $userEmail", fontSize = 20.sp)
+                }
             }
 
             // Spacer
             Spacer(modifier = Modifier.width(16.dp))
-
         }
 
-        // Button to update username
+        // Button to toggle editing state
         Button(
-            onClick = {
-                updateFirebaseUsername(userName ?: "")
-            },
+            onClick = { isEditing = !isEditing },
             modifier = Modifier
                 .width(200.dp)
                 .padding(top = 16.dp)
         ) {
             Text(
-                text = "Update Information",
+                text = if (isEditing) "Done Updating" else "Update Information",
                 fontSize = 17.sp,
             )
-
         }
-
 
         // New Debt and Group Updates
         Text(
@@ -137,6 +152,7 @@ fun UserScreen(navController: NavController) {
                 }
             )
         }
+
         // Button to Change Password
         Button(
             onClick = {
@@ -155,19 +171,27 @@ fun UserScreen(navController: NavController) {
     }
 }
 
-fun updateFirebaseUsername(newName: String){
+// Function to update user information in Firebase
+fun updateFirebaseUserInfo(newName: String, newEmail: String) {
     val user = FirebaseAuth.getInstance().currentUser
     val profileUpdater = UserProfileChangeRequest.Builder()
         .setDisplayName(newName)
         .build()
 
     user?.updateProfile(profileUpdater)
-        ?.addOnCompleteListener { task -> if (task.isSuccessful) {
+        ?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                println("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
+                // Update email if provided
+                user.updateEmail(newEmail)
+                    .addOnCompleteListener { emailTask ->
+                        if (emailTask.isSuccessful) {
+                            println("User information updated successfully.")
+                        } else {
+                            println("Failed to update email.")
+                        }
+                    }
+            } else {
+                println("Failed to update user information.")
             }
-        } else {
-            println("NEJSAEIHUDANSKJDHJKASHNKDAsæd")
         }
-    }
 }
