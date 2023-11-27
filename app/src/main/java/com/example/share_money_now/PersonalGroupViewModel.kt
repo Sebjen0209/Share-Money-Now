@@ -53,10 +53,10 @@ class PersonalGroupViewModel : ViewModel() {
 
     fun checkIfEmailExistsInFirebase(email: String, callback: (Boolean) -> Unit) {
         // Assuming you have a "users" node in your Realtime Database
-        val usersRef = databaseReference.child("persons")
+        val personsRef = databaseReference.child("persons")
 
         // Query the users node to check if the email exists
-        usersRef.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object : ValueEventListener {
+        personsRef.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // If there are any children in the result, the email exists
                 val isEmailRegistered = snapshot.childrenCount > 0

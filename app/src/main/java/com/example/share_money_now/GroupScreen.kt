@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,11 +56,11 @@ fun GroupScreen(navController: NavController, groupId: String?,
                 firebaseManager: FirebaseManager,
                 viewModel: PersonalGroupViewModel = viewModel()
 ) {
-    var groupName by remember { mutableStateOf("Group Name") }
-    var totalAmount by remember { mutableStateOf(1000.0) }
+    var totalAmount by remember { mutableStateOf(0.0) }
     var participants by remember { mutableStateOf(listOf("")) }
-    var description by remember { mutableStateOf("Group Description") }
     var showDialog by remember { mutableStateOf(false) }
+    var showDialogExpense by remember { mutableStateOf(false) }
+    var expenseValue by remember { mutableStateOf<Double?>(null) }
     var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var group by remember { mutableStateOf(Group()) }
     val gId = groupId.toString()
@@ -87,7 +90,12 @@ fun GroupScreen(navController: NavController, groupId: String?,
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = group.name) },
+                title = { Text(
+                    text = group.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center)
+                ) },
                 actions = {
                     Button(onClick = { /* Handle edit button click */ }) {
                         Text(text = "Edit")
@@ -104,7 +112,16 @@ fun GroupScreen(navController: NavController, groupId: String?,
         ) {
             // Total Amount
             Text(
-                text = "Total Amount: $totalAmount",
+                text = "Total Amount: ",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center)
+            )
+            Text(
+                text = "$totalAmount",
+                modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentSize(Alignment.Center)
             )
 
             // Participants
@@ -116,7 +133,7 @@ fun GroupScreen(navController: NavController, groupId: String?,
                 items(participants.size) { index ->
                     ParticipantRow(
                         name = participants.getOrNull(index) ?: "",
-                        debt = 50.0, // Replace with actual debt value
+                        debt = 0.0, // Replace with actual debt value
                         onRemoveClick = {
                             val emailToRemove = participants.getOrNull(index) ?: ""
                             val indexToRemove =
@@ -147,6 +164,7 @@ fun GroupScreen(navController: NavController, groupId: String?,
                 text = "Description: ${group.description}",
             )
 
+
             // Edit Button
             Button(
                 onClick = { /* Handle edit button click */ },
@@ -155,6 +173,80 @@ fun GroupScreen(navController: NavController, groupId: String?,
                     .padding(vertical = 8.dp)
             ) {
                 Text(text = "Edit")
+            }
+
+            Button(
+                onClick = {
+                    showDialogExpense = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(text = "Share Group Expense")
+            }
+
+            if (showDialogExpense) {
+                Dialog(
+                    onDismissRequest = {
+                        showDialog = false
+                    },
+                    content = {
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Enter Expense Amount",
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = expenseValue.toString(),
+                                onValueChange = {
+                                    // Handle the case where the input is not a valid double
+                                    expenseValue = it.toDoubleOrNull() ?: 0.0
+                                },
+                                label = { Text("Expense Amount") },
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Number
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        // Dismiss the dialog without processing the input
+                                        showDialogExpense = false
+                                    }
+                                ) {
+                                    Text(text = "Cancel")
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                TextButton(
+                                    onClick = {
+                                        totalAmount += expenseValue!!
+                                        showDialogExpense = false
+                                    }
+                                ) {
+                                    Text(text = "OK")
+                                }
+                            }
+                        }
+                    }
+                )
             }
 
             // Add People Button
