@@ -18,19 +18,21 @@ class FirebaseManager {
     }
 
     fun createGroup(group: Group) {
-        val groupReference = databaseReference.child("groups").push()
+        // Get a reference to the "groups" node
+        val groupsReference = databaseReference.child("groups")
 
-        val groupId = groupReference.key
+        // Use push() to generate a unique ID and get a reference to the new group node
+        val groupReference = groupsReference.push()
 
-        val paymentReference = databaseReference.child("paymentLists").child(groupId?: "")
-
-        val samplePaymentList = PaymentList(
-            groupId = groupId ?: ""
-        )
-
-        groupReference.setValue(group)
-        paymentReference.setValue(samplePaymentList)
-
+        // Set the value of the new group with the generated key
+        groupReference.setValue(groupReference.key?.let { group.copy(id = it) })
+            .addOnSuccessListener {
+                // Handle success
+            }
+            .addOnFailureListener { e ->
+                // Handle failure
+                e.printStackTrace()
+            }
     }
 
     fun addPersonToGroup(groupId: String, person: Person) {

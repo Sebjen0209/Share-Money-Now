@@ -249,35 +249,6 @@ fun GroupScreen(navController: NavController,
                             Text(text = "Remove")
                         }
                     }
-
-                    /*
-                    ParticipantRow(
-                        name = participants.getOrNull(index) ?: "",
-                        debt = ,
-                        onRemoveClick = {
-                            val emailToRemove = participants.getOrNull(index) ?: ""
-                            val indexToRemove =
-                                group.members.indexOfFirst { (it?.name ?: "") == emailToRemove }
-
-                            if (indexToRemove != -1) {
-                                // Email is registered and found in the members list
-                                // Remove the Person from the members list
-                                val updatedMembers = group.members.toMutableList().apply {
-                                    removeAt(indexToRemove)
-                                }
-
-                                // Update the group with the modified members list
-                                group = group.copy(members = updatedMembers)
-
-                                // Update the group in the Firebase Realtime Database
-                                personalGroupViewModel.updateGroupInFirebase(group)
-
-                                participants = group.members.map { it?.name ?: "" }
-                            }
-                        }
-                    )
-
-                     */
                 }
             }
 
@@ -381,7 +352,9 @@ fun GroupScreen(navController: NavController,
             // Pay Button
             Button(
                 onClick = {
-                    showDialogPay = true
+                          /*
+                          TODO, IMPLEMENT PAY MY PART FUNCTIONALITY
+                           */
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -392,86 +365,6 @@ fun GroupScreen(navController: NavController,
                 ) {
                     Text(text = "Pay My Part")
                 }
-            }
-
-// ...
-
-// Inside your composable function
-
-            if (showDialogPay) {
-                Dialog(
-                    onDismissRequest = {
-                        showDialogPay = false
-                    },
-                    content = {
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Enter Payment Amount",
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .padding(bottom = 8.dp)
-                            )
-
-                            OutlinedTextField(
-                                value = paymentAmount.toString(),
-                                onValueChange = {
-                                    // Handle the case where the input is not a valid double
-                                    paymentAmount = it.toDoubleOrNull() ?: 0.0
-                                },
-                                label = { Text("Payment Amount") },
-                                keyboardOptions = KeyboardOptions.Default.copy(
-                                    keyboardType = KeyboardType.Number
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 16.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        // Dismiss the dialog without processing the input
-                                        showDialogPay = false
-                                    }
-                                ) {
-                                    Text(text = "Cancel")
-                                }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                TextButton(
-                                    onClick = {
-                                        // Update the paidAmount in the database with the entered paymentAmount
-                                        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
-                                        if (currentUserEmail != null) {
-                                            val cleanEmail = currentUserEmail.replace(".", "")
-                                            val updatedPaidAmount = group.paidAmount.toMutableMap().apply {
-                                                val currentAmount = getOrDefault(cleanEmail, 0.0)
-                                                put(cleanEmail, currentAmount + paymentAmount)
-                                            }
-                                            group = group.copy(paidAmount = updatedPaidAmount)
-                                            personalGroupViewModel.updateGroupInFirebase(group)
-
-                                            // Reset the paymentAmount and dismiss the dialog
-                                            paymentAmount = 0.0
-                                            showDialogPay = false
-                                        }
-                                    }
-                                ) {
-                                    Text(text = "OK")
-                                }
-                            }
-                        }
-                    }
-                )
             }
 
             // Add people Button
