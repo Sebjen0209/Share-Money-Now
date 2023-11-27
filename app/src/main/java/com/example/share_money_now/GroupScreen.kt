@@ -66,10 +66,6 @@ fun GroupScreen(navController: NavController, groupId: String?,
     var group by remember { mutableStateOf(Group()) }
     val gId = groupId.toString()
 
-    var paymentList by remember { mutableStateOf<List<Payment>>(emptyList()) }
-    var paidAmount by remember { mutableStateOf<Map<Person, Double>>(emptyMap()) }
-    var individualCostAmount by remember { mutableStateOf<Map<Person, Double>>(emptyMap()) }
-
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -169,7 +165,16 @@ fun GroupScreen(navController: NavController, groupId: String?,
             Text(
                 text = "Description: ${group.description}",
             )
-
+            Button(
+                onClick = {
+                          navController.navigate(Screen.ExpensesScreen.route)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(text = "View group expenses")
+            }
 
             // Edit Button
             Button(

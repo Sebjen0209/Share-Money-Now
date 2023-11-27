@@ -18,6 +18,7 @@ class CreateGroupViewModel : ViewModel() {
     private val _groups = MutableLiveData<List<Group>>()
     val items: LiveData<List<Group>> get() = _groups
 
+    /*
     fun getItemsById(groupOwnerId: String, personEmail: String) {
         val query = databaseReference.getReference("groups").orderByChild("ownerId").equalTo(groupOwnerId)
 
@@ -28,6 +29,33 @@ class CreateGroupViewModel : ViewModel() {
                 for (itemSnapshot in snapshot.children) {
                     val item = itemSnapshot.getValue(Group::class.java)
                     item?.let { groupList.add(it) }
+                }
+
+                _groups.value = groupList
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle the error
+            }
+        })
+    }
+
+     */
+
+    fun getItemsByMember(personEmail: String) {
+        val query = databaseReference.getReference("groups")
+
+        query.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val groupList = mutableListOf<Group>()
+
+                for (itemSnapshot in snapshot.children) {
+                    val item = itemSnapshot.getValue(Group::class.java)
+                    item?.let {
+                        if (personEmail in it.members.mapNotNull { member -> member?.email }) {
+                            groupList.add(it)
+                        }
+                    }
                 }
 
                 _groups.value = groupList

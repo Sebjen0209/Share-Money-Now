@@ -46,8 +46,11 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
 
     val CreateGroupViewModel = viewModel<CreateGroupViewModel>()
 
-    LaunchedEffect(Unit){
-        viewModel.getItemsById(FirebaseAuth.getInstance().currentUser?.email.toString(), "")
+    LaunchedEffect(Unit) {
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
+        currentUserEmail?.let { email ->
+            CreateGroupViewModel.getItemsByMember(email)
+        }
     }
 
     Column(
