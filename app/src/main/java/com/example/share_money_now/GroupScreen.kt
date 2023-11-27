@@ -94,9 +94,6 @@ fun GroupScreen(navController: NavController, groupId: String?,
                     }
                 }
             )
-            println(group.name)
-            println(group.id)
-            println(group.ownerId)
         }
     ) { innerPadding ->
         Column(
@@ -118,11 +115,27 @@ fun GroupScreen(navController: NavController, groupId: String?,
             ) {
                 items(participants.size) { index ->
                     ParticipantRow(
-                        name = participants[index],
+                        name = participants.getOrNull(index) ?: "",
                         debt = 50.0, // Replace with actual debt value
                         onRemoveClick = {
-                            participants = participants.toMutableList().apply {
-                                removeAt(index)
+                            val emailToRemove = participants.getOrNull(index) ?: ""
+                            val indexToRemove =
+                                group.members.indexOfFirst { it?.name ?: "" == emailToRemove }
+
+                            if (indexToRemove != -1) {
+                                // Email is registered and found in the members list
+                                // Remove the Person from the members list
+                                val updatedMembers = group.members.toMutableList().apply {
+                                    removeAt(indexToRemove)
+                                }
+
+                                // Update the group with the modified members list
+                                group = group.copy(members = updatedMembers)
+
+                                // Update the group in the Firebase Realtime Database
+                                personalGroupViewModel.updateGroupInFirebase(group)
+
+                                participants = group.members.map { it?.name ?: "" }
                             }
                         }
                     )
@@ -237,6 +250,9 @@ fun GroupScreen(navController: NavController, groupId: String?,
                                                 group = group.copy(members = group.members + newPerson)
 
                                                 personalGroupViewModel.updateGroupInFirebase(group)
+
+                                                participants = group.members.map { it?.name ?: "" }
+
                                                 showDialog = false
                                                 // Hide the keyboard when the "Add" button is clicked
                                                 keyboardController?.hide()
