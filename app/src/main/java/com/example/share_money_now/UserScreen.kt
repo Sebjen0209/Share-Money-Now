@@ -103,9 +103,27 @@ fun UserScreen(navController: NavController) {
                 .padding(top = 16.dp)
         ) {
             Text(
-                text = if (isEditing) "Done Updating" else "Update Information",
+                text = if (isEditing) "Cancel" else "Edit Information",
                 fontSize = 17.sp,
             )
+        }
+
+        // Button to update username and email
+        if (isEditing) {
+            Button(
+                onClick = {
+                    updateFirebaseUserInfo(userName ?: "", userEmail ?: "")
+                    isEditing = false
+                },
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(top = 16.dp)
+            ) {
+                Text(
+                    text = "Update Information",
+                    fontSize = 17.sp,
+                )
+            }
         }
 
         // New Debt and Group Updates
