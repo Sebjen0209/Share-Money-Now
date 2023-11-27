@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.AndroidEntryPoint
+import com.example.share_money_now.ui.theme.ShareMoneyNowTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -12,7 +13,9 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this);
         super.onCreate(savedInstanceState)
         setContent {
-            Navigation()
+            ShareMoneyNowTheme{
+                Navigation()
+            }
         }
     }
 }

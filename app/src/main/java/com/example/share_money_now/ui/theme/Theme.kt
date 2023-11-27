@@ -13,18 +13,19 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = PrimaryColor,
+    secondary = DarkVariant2,
+    tertiary = LightVariant3
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = LightVariant2,
+    secondary = LightVariant1,
+    tertiary = LightVariant3
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -36,7 +37,6 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
-
 @Composable
 fun ShareMoneyNowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary_color">#47c2ff</color>
+
     <!-- Lighter variations of the primary color -->
     <color name="light_variant_1">#80aee5</color>
     <color name="light_variant_2">#a4c3f9</color>
@@ -9,7 +11,4 @@
     <color name="dark_variant_1">#1a6bb3</color>
     <color name="dark_variant_2">#00518a</color>
     <color name="dark_variant_3">#003b66</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
 </resources>
