@@ -74,15 +74,13 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                 .padding(bottom = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent)
         ) {
-            userName?.let {
                 Text(
-                    text = it,
+                    text = userName.toString(),
                     color = Color.Black,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center
 
                 )
-            }
         }
 
         // Group List
