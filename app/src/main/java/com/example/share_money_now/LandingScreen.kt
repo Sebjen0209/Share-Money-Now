@@ -202,7 +202,9 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                                     currentUser.email ?: "",
                                     newGroupName,
                                     listOf(Person(currentUser.email ?: "", associatedName)),
-                                    groupDescription
+                                    groupDescription,
+                                    0.0,
+                                    mapOf(((currentUser.email).toString()).replace(".","") to 0.0)
                                 )
 
                                 // Create the group and navigate

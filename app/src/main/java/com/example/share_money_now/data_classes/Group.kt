@@ -5,5 +5,7 @@ data class Group(
     val ownerId: String = "",
     val name: String = "",
     val members: List<Person?> = emptyList(),
-    val description: String = ""
+    val description: String = "",
+    val totalAmount: Double = 0.0,
+    var paidAmount: Map<String, Double> = emptyMap()
 )
