@@ -4,6 +4,6 @@ data class Group(
     val id: String = "",
     val ownerId: String = "",
     val name: String = "",
-    val members: List<Person> = emptyList(),
+    val members: List<Person?> = emptyList(),
     val description: String = ""
 )

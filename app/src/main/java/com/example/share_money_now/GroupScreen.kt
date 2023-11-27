@@ -44,6 +44,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
+import com.example.share_money_now.data_classes.Person
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -53,7 +55,7 @@ fun GroupScreen(navController: NavController, groupId: String?,
 ) {
     var groupName by remember { mutableStateOf("Group Name") }
     var totalAmount by remember { mutableStateOf(1000.0) }
-    var participants by remember { mutableStateOf(listOf("Participant 1", "Participant 2")) }
+    var participants by remember { mutableStateOf(listOf("")) }
     var description by remember { mutableStateOf("Group Description") }
     var showDialog by remember { mutableStateOf(false) }
     var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
@@ -70,6 +72,8 @@ fun GroupScreen(navController: NavController, groupId: String?,
                 personalGroupViewModel.fetchGroupDetails(firebaseGroupId) { fetchedGroup ->
                     if (fetchedGroup != null) {
                         group = fetchedGroup // Update the 'group' variable with fetched data
+
+                        participants = fetchedGroup.members.map { it?.name ?: "" }
                     } else {
                         // Handle scenario when group data is null or not found
                     }
@@ -219,12 +223,30 @@ fun GroupScreen(navController: NavController, groupId: String?,
 
                                 TextButton(
                                     onClick = {
-                                        participants = participants.toMutableList().apply {
-                                            add(textFieldValue.text)
+                                        val emailToAdd = textFieldValue.text
+                                        val currentUserName = FirebaseAuth.getInstance().currentUser?.displayName
+
+                                        personalGroupViewModel.checkIfEmailExistsInFirebase(emailToAdd) { isEmailRegistered ->
+                                            if (isEmailRegistered) {
+                                                // Email is registered, add the participant
+                                                participants = participants.toMutableList().apply {
+                                                    add(emailToAdd)
+                                                }
+
+                                                val newPerson = currentUserName?.let { Person(emailToAdd, it) }
+                                                group = group.copy(members = group.members + newPerson)
+
+                                                personalGroupViewModel.updateGroupInFirebase(group)
+                                                showDialog = false
+                                                // Hide the keyboard when the "Add" button is clicked
+                                                keyboardController?.hide()
+                                            } else {
+                                                // Handle the scenario when the email is not registered
+                                                // You might want to display an error message or take appropriate action
+                                                // For now, let's just print a message
+                                                println("Email is not registered in Firebase.")
+                                            }
                                         }
-                                        showDialog = false
-                                        // Hide the keyboard when the "Add" button is clicked
-                                        keyboardController?.hide()
                                     }
                                 ) {
                                     Text(text = "Add")
