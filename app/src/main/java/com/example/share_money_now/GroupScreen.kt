@@ -63,6 +63,7 @@ fun GroupScreen(navController: NavController,
                 firebaseManager: FirebaseManager,
                 viewModel: PersonalGroupViewModel = viewModel()
 ) {
+
     var totalAmount by remember { mutableStateOf(0.0) }
     var participants by remember { mutableStateOf(listOf("")) }
     var showDialog by remember { mutableStateOf(false) }
@@ -73,16 +74,39 @@ fun GroupScreen(navController: NavController,
     var paidAmountMap: Map<String, Double> = emptyMap()
     var group by remember { mutableStateOf(Group()) }
     var cleanEmail = FirebaseAuth.getInstance().currentUser?.email?.replace(".", "")
+    var mail by remember { mutableStateOf("") }
     var paymentAmount by remember { mutableStateOf(0.0) }
     val gId = groupId.toString()
-
-
-
     val keyboardController = LocalSoftwareKeyboardController.current
-
     val personalGroupViewModel = viewModel<PersonalGroupViewModel>()
-
     val groupState by personalGroupViewModel.group.collectAsState()
+    var debt by remember { mutableStateOf(0.0) }
+
+    if (!groupId.isNullOrBlank()) {
+        personalGroupViewModel.findGroupByGroupId(groupId) { firebaseGroupId ->
+            if (firebaseGroupId != null) {
+                personalGroupViewModel.fetchGroupDetails(firebaseGroupId) { fetchedGroup ->
+                    if (fetchedGroup != null) {
+                        group = fetchedGroup // Update the 'group' variable with fetched data
+
+                        participants = fetchedGroup.members.map { it?.name ?: "" }
+
+                        totalAmount = fetchedGroup.totalAmount
+
+                        paidAmountMap = fetchedGroup.paidAmount
+
+                        personalGroupViewModel.setGroup(fetchedGroup)
+
+                    } else {
+                        // Handle scenario when group data is null or not found
+                    }
+                }
+            } else {
+                // Handle scenario when groupId is not found
+            }
+        }
+    }
+
 
     // LaunchedEffect for fetching group details
     LaunchedEffect(groupId) {
@@ -100,6 +124,7 @@ fun GroupScreen(navController: NavController,
                             paidAmountMap = fetchedGroup.paidAmount
 
                             personalGroupViewModel.setGroup(fetchedGroup)
+
                         } else {
                             // Handle scenario when group data is null or not found
                         }
@@ -155,7 +180,20 @@ fun GroupScreen(navController: NavController,
                     .weight(1f)
             ) {
                 items(participants.size) { index ->
-                    var debt = (totalAmount / participants.size) - (groupState?.paidAmount?.get(cleanEmail) ?: 0.0)
+                try {
+                    if (group.members.size > 0){
+                        mail = (group.members.get(index)?.email)?.replace(".","") ?: ""
+                        debt = (totalAmount / participants.size) - (paidAmountMap[mail]?.toDouble() ?: 0.0)
+                    }else{
+                        debt = 0.0
+                    }
+                }
+                catch (e: Exception){
+                    debt = 0.0
+                }
+
+
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -195,11 +233,6 @@ fun GroupScreen(navController: NavController,
                             Text(text = "Remove")
                         }
                     }
-
-
-
-
-
 
                     /*
                     ParticipantRow(
