@@ -47,6 +47,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
+import com.example.share_money_now.data_classes.Payment
 import com.example.share_money_now.data_classes.Person
 import com.google.firebase.auth.FirebaseAuth
 
@@ -64,6 +65,7 @@ fun GroupScreen(navController: NavController, groupId: String?,
     var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var group by remember { mutableStateOf(Group()) }
     val gId = groupId.toString()
+
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -163,7 +165,16 @@ fun GroupScreen(navController: NavController, groupId: String?,
             Text(
                 text = "Description: ${group.description}",
             )
-
+            Button(
+                onClick = {
+                          navController.navigate(Screen.ExpensesScreen.route)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(text = "View group expenses")
+            }
 
             // Edit Button
             Button(

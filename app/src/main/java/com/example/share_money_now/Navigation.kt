@@ -42,6 +42,10 @@ fun Navigation() {
             UserScreen(navController = navController)
         }
 
+        composable(route = Screen.ExpensesScreen.route) {
+            ExpensesScreen(navController = navController)
+        }
+
         composable(
             route = "group_screen/{groupId}",
             arguments = listOf(
@@ -52,7 +56,10 @@ fun Navigation() {
             GroupScreen(navController = navController, groupId = backstackEntry.arguments?.getString("groupId"), firebaseManager = FirebaseManager())
             //GroupScreen(navController = navController)
         }
+
+
     }
+
 }
 
 private fun checkUserSignedIn(): Boolean {
