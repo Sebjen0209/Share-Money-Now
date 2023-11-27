@@ -35,7 +35,7 @@ class MessageService : FirebaseMessagingService(){
             NotificationCompat.Builder(applicationContext)
         }
         notificationBuilder = notificationBuilder
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_smn_logo)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
