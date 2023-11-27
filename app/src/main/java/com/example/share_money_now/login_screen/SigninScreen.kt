@@ -64,7 +64,7 @@ fun SigninScreen(
         Text(
             text = "Sign In",
             fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
+            fontSize = 17.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 

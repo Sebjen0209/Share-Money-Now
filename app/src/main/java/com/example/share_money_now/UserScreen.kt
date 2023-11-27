@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
@@ -73,19 +74,6 @@ fun UserScreen(navController: NavController) {
             // Spacer
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Right side (Values)
-            Column (verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = userName ?: "",
-                    onValueChange = {userName = it},
-                    label = {Text("New Username")},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                )
-                userEmail?.let { Text(text = it, fontSize = 20.sp) }
-                Text(text = userPassword, fontSize = 20.sp)
-            }
         }
 
         // Button to update username
@@ -97,7 +85,11 @@ fun UserScreen(navController: NavController) {
                 .width(200.dp)
                 .padding(top = 16.dp)
         ) {
-            Text(text = "Update Information")
+            Text(
+                text = "Update Information",
+                fontSize = 17.sp,
+            )
+
         }
 
 
@@ -155,7 +147,10 @@ fun UserScreen(navController: NavController) {
                 .width(200.dp)
                 .padding(top = 16.dp)
         ) {
-            Text(text = "Log Out")
+            Text(
+                text = "Log Out",
+                fontSize = 17.sp,
+            )
         }
     }
 }
