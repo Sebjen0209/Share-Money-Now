@@ -32,10 +32,10 @@ fun WelcomeScreen(navController: NavController) {
     ) {
         // Logo
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground), //temp logo
+            painter = painterResource(id = R.drawable.sharemoneynowlogo), //temp logo
             contentDescription = "Logo",
             modifier = Modifier
-                .fillMaxWidth()
+                .width(250.dp)
                 .height(200.dp)
         )
         // Welcome Text

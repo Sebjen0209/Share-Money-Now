@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,10 +59,10 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
     ) {
         // Logo
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.sharemoneynowlogo),
             contentDescription = "Logo",
             modifier = Modifier
-                .fillMaxWidth()
+                .width(250.dp)
                 .height(200.dp)
         )
         // User Name Button
