@@ -157,6 +157,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
         }
         var isButtonClicked by remember { mutableStateOf(false) }
 
+        // Display error message if newGroupName is empty and the button is clicked
         if (newGroupName.isEmpty() && isButtonClicked) {
             Text(
                 text = "Please enter a group name",
@@ -187,13 +188,13 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
-
             // Button to Confirm New Group
             Button(
                 onClick = {
                     val currentUser = FirebaseAuth.getInstance().currentUser
 
                     if (currentUser != null) {
+                        // Fetch the associated name for the logged-in user
                         CreateGroupViewModel.fetchNameForEmail(currentUser.email ?: "") { associatedName ->
                             if (associatedName != null) {
                                 val group = Group(
@@ -206,6 +207,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                                     mapOf(((currentUser.email).toString()).replace(".","") to 0.0)
                                 )
 
+                                // Create the group and navigate
                                 firebaseManager.createGroup(group)
                                 if (newGroupName.isNotEmpty()) {
                                     newGroupName = ""
@@ -215,10 +217,12 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                                     isButtonClicked = true
                                 }
                             } else {
+                                // Handle the case when the associated name is not found
                                 println("Associated name not found for the logged-in user.")
                             }
                         }
                     } else {
+                        // Handle the case when the current user is null
                         println("Current user is null.")
                     }
                 },
@@ -228,10 +232,11 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
             }
             Button(
                 onClick = {
+                    // Reset necessary states and variables
                     newGroupName = ""
                     groupDescription = ""
                     isAddingGroup = false
-                    isButtonClicked = false
+                    isButtonClicked = false // Reset error message state if needed
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(Color(0xFFFF5A5F ))
