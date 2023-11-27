@@ -80,7 +80,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation("com.google.firebase:firebase-common-ktx:20.4.2")
-    implementation("com.google.firebase:firebase-database:20.3.0") // Updated version
+    implementation("com.google.firebase:firebase-database:20.3.0") //
+    // Updated version
+    implementation("androidx.compose.ui:ui-test-junit4:1.5.4")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
