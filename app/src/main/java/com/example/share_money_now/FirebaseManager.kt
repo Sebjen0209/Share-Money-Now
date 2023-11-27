@@ -10,25 +10,21 @@ import com.google.firebase.database.ValueEventListener
 class FirebaseManager {
     private val databaseReference: DatabaseReference
 
-    // Initialize Firebase with a specific database URL
     init {
-        //FirebaseDatabase.getInstance("https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app")
         databaseReference = FirebaseDatabase.getInstance("https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app").reference
     }
 
     fun createGroup(group: Group) {
-        val groupReference = databaseReference.child("groups").push()
-        groupReference.setValue(group)
-    }
+        val groupsReference = databaseReference.child("groups")
 
-    fun addPersonToGroup(groupId: String, person: Person) {
-        val groupReference = databaseReference.child("groups").child(groupId)
-        groupReference.child("members").push().setValue(person)
-    }
+        val groupReference = groupsReference.push()
 
-    fun removePersonFromGroup(groupId: String, personId: String) {
-        val groupReference = databaseReference.child("groups").child(groupId).child("members").child(personId)
-        groupReference.removeValue()
+        groupReference.setValue(groupReference.key?.let { group.copy(id = it) })
+            .addOnSuccessListener {
+            }
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+            }
     }
 
     fun addPersonOnSignUp(person: Person){

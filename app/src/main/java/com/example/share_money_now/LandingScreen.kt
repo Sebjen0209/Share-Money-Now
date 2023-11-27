@@ -1,7 +1,6 @@
 package com.example.share_money_now
 
 import FirebaseManager
-import PersonalGroupViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,23 +45,28 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
 
     val CreateGroupViewModel = viewModel<CreateGroupViewModel>()
 
-    LaunchedEffect(Unit){
-        viewModel.getItemsById(FirebaseAuth.getInstance().currentUser?.email.toString(), "")
+    LaunchedEffect(Unit) {
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
+        currentUserEmail?.let { email ->
+            CreateGroupViewModel.getItemsByMember(email)
+        }
     }
 
     Column(
         modifier = Modifier
-            .padding(16.dp),
+            .padding(16.dp)
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Logo
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.sharemoneynowlogo),
             contentDescription = "Logo",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+                .width(250.dp)
+                .height(100.dp),
+
         )
         // User Name Button
         Button(
@@ -70,15 +74,16 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                 navController.navigate(Screen.UserScreen.route)
             },
             modifier = Modifier
-                .width(200.dp)
+                .fillMaxWidth()
                 .padding(bottom = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent)
         ) {
                 Text(
-                    text = userName.toString(),
+                    text = "Welcome " + userName.toString() + "!",
                     color = Color.Black,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
+                    fontSize = 30.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.height(50.dp)
 
                 )
         }
@@ -93,7 +98,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                 item {
                     var editableText by remember { mutableIntStateOf(100) }
                     val textColor =
-                        if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
+                        if (editableText < 0) Color.Red else if (editableText > 0) Color(0xFF006400) else Color.Black
                     Button(
                         onClick = {
                             val groupId = item.id
@@ -101,7 +106,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = 0.dp),
                         colors = ButtonDefaults.buttonColors(Color.Transparent)
                     ) {
                         Row(
@@ -115,20 +120,25 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                             Text(
                                 text = item.name + "    -  ",
                                 color = Color.Black,
-                                fontSize = 16.sp,
+                                fontSize = 20.sp,
                                 modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
                                 textAlign = TextAlign.Center
                             )
 
                             // Second Text with the value of "editableText" and different color
                             Text(
-                                text = editableText.toString(),
+                                text = "$editableText kr.",
                                 color = textColor,
-                                fontSize = 16.sp,
+                                fontSize = 20.sp,
                                 textAlign = TextAlign.Center
                             )
                         }
                     }
+                    Divider(
+                        color = Color.Gray,
+                        thickness = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -147,7 +157,6 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
         }
         var isButtonClicked by remember { mutableStateOf(false) }
 
-        // Display error message if newGroupName is empty and the button is clicked
         if (newGroupName.isEmpty() && isButtonClicked) {
             Text(
                 text = "Please enter a group name",
@@ -178,13 +187,13 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
+
             // Button to Confirm New Group
             Button(
                 onClick = {
                     val currentUser = FirebaseAuth.getInstance().currentUser
 
                     if (currentUser != null) {
-                        // Fetch the associated name for the logged-in user
                         CreateGroupViewModel.fetchNameForEmail(currentUser.email ?: "") { associatedName ->
                             if (associatedName != null) {
                                 val group = Group(
@@ -192,10 +201,11 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                                     currentUser.email ?: "",
                                     newGroupName,
                                     listOf(Person(currentUser.email ?: "", associatedName)),
-                                    groupDescription
+                                    groupDescription,
+                                    0.0,
+                                    mapOf(((currentUser.email).toString()).replace(".","") to 0.0)
                                 )
 
-                                // Create the group and navigate
                                 firebaseManager.createGroup(group)
                                 if (newGroupName.isNotEmpty()) {
                                     newGroupName = ""
@@ -205,18 +215,28 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                                     isButtonClicked = true
                                 }
                             } else {
-                                // Handle the case when the associated name is not found
                                 println("Associated name not found for the logged-in user.")
                             }
                         }
                     } else {
-                        // Handle the case when the current user is null
                         println("Current user is null.")
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Add Group")
+            }
+            Button(
+                onClick = {
+                    newGroupName = ""
+                    groupDescription = ""
+                    isAddingGroup = false
+                    isButtonClicked = false
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(Color(0xFFFF5A5F ))
+            ) {
+                Text(text = "Cancel")
             }
         }
     }

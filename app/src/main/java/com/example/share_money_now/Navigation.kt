@@ -18,7 +18,6 @@ import com.google.firebase.auth.FirebaseAuth
 fun Navigation() {
     val navController = rememberNavController()
 
-    // Check if the user is already signed in
     val isUserSignedIn by remember { mutableStateOf(checkUserSignedIn()) }
 
     NavHost(navController = navController, startDestination = getStartDestination(isUserSignedIn)) {
@@ -50,9 +49,11 @@ fun Navigation() {
             )
         ) { backstackEntry ->
             GroupScreen(navController = navController, groupId = backstackEntry.arguments?.getString("groupId"), firebaseManager = FirebaseManager())
-            //GroupScreen(navController = navController)
         }
+
+
     }
+
 }
 
 private fun checkUserSignedIn(): Boolean {

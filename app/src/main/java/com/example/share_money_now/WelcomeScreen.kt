@@ -22,7 +22,6 @@ import androidx.navigation.NavController
 
 @Composable
 fun WelcomeScreen(navController: NavController) {
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -32,10 +31,10 @@ fun WelcomeScreen(navController: NavController) {
     ) {
         // Logo
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground), //temp logo
+            painter = painterResource(id = R.drawable.sharemoneynowlogo),
             contentDescription = "Logo",
             modifier = Modifier
-                .fillMaxWidth()
+                .width(250.dp)
                 .height(200.dp)
         )
         // Welcome Text
