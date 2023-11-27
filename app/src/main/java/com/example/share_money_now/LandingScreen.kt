@@ -1,6 +1,7 @@
 package com.example.share_money_now
 
 import FirebaseManager
+import PersonalGroupViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
+import com.example.share_money_now.data_classes.Person
 import com.google.firebase.auth.FirebaseAuth
 import java.util.UUID
 
@@ -41,6 +43,8 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
     var isAddingGroup by remember { mutableStateOf(false) }
     val groups by viewModel.items.observeAsState(emptyList())
     var groupDescription by remember { mutableStateOf("") }
+
+    val CreateGroupViewModel = viewModel<CreateGroupViewModel>()
 
     LaunchedEffect(Unit){
         viewModel.getItemsById(FirebaseAuth.getInstance().currentUser?.email.toString(), "")
@@ -179,21 +183,37 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
             // Button to Confirm New Group
             Button(
                 onClick = {
-                    val group = Group(
-                        UUID.randomUUID().toString(),
-                        FirebaseAuth.getInstance().currentUser?.email.toString(),
-                        newGroupName,
-                        emptyList(),
-                        groupDescription
-                    )
-                    firebaseManager.createGroup(group)
-                    if (newGroupName.isNotEmpty()) {
-                        //groups = groups + newGroupName
-                        newGroupName = ""
-                        isAddingGroup = false
-                        navController.navigate("group_screen/${group.id}")
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+
+                    if (currentUser != null) {
+                        // Fetch the associated name for the logged-in user
+                        CreateGroupViewModel.fetchNameForEmail(currentUser.email ?: "") { associatedName ->
+                            if (associatedName != null) {
+                                val group = Group(
+                                    UUID.randomUUID().toString(),
+                                    currentUser.email ?: "",
+                                    newGroupName,
+                                    listOf(Person(currentUser.email ?: "", associatedName)),
+                                    groupDescription
+                                )
+
+                                // Create the group and navigate
+                                firebaseManager.createGroup(group)
+                                if (newGroupName.isNotEmpty()) {
+                                    newGroupName = ""
+                                    isAddingGroup = false
+                                    navController.navigate("group_screen/${group.id}")
+                                } else {
+                                    isButtonClicked = true
+                                }
+                            } else {
+                                // Handle the case when the associated name is not found
+                                println("Associated name not found for the logged-in user.")
+                            }
+                        }
                     } else {
-                        isButtonClicked = true
+                        // Handle the case when the current user is null
+                        println("Current user is null.")
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

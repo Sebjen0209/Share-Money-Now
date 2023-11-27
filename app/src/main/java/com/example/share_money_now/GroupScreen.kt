@@ -237,7 +237,6 @@ fun GroupScreen(navController: NavController, groupId: String?,
                                 TextButton(
                                     onClick = {
                                         val emailToAdd = textFieldValue.text
-                                        val currentUserName = FirebaseAuth.getInstance().currentUser?.displayName
 
                                         personalGroupViewModel.checkIfEmailExistsInFirebase(emailToAdd) { isEmailRegistered ->
                                             if (isEmailRegistered) {
@@ -246,16 +245,27 @@ fun GroupScreen(navController: NavController, groupId: String?,
                                                     add(emailToAdd)
                                                 }
 
-                                                val newPerson = currentUserName?.let { Person(emailToAdd, it) }
-                                                group = group.copy(members = group.members + newPerson)
+                                                // Fetch the associated name for the emailToAdd from the database
+                                                personalGroupViewModel.fetchNameForEmail(emailToAdd) { associatedName ->
+                                                    if (associatedName != null) {
+                                                        // Use the associated name when creating the new Person
+                                                        val newPerson = Person(emailToAdd, associatedName)
+                                                        group = group.copy(members = group.members + newPerson)
 
-                                                personalGroupViewModel.updateGroupInFirebase(group)
+                                                        // Update the group in the Firebase Realtime Database
+                                                        personalGroupViewModel.updateGroupInFirebase(group)
 
-                                                participants = group.members.map { it?.name ?: "" }
+                                                        // Update participants with the names of the current members
+                                                        participants = group.members.map { it?.name ?: "" }
 
-                                                showDialog = false
-                                                // Hide the keyboard when the "Add" button is clicked
-                                                keyboardController?.hide()
+                                                        showDialog = false
+                                                        // Hide the keyboard when the "Add" button is clicked
+                                                        keyboardController?.hide()
+                                                    } else {
+                                                        // Handle the scenario when the associated name is not found
+                                                        println("Associated name not found for the email: $emailToAdd")
+                                                    }
+                                                }
                                             } else {
                                                 // Handle the scenario when the email is not registered
                                                 // You might want to display an error message or take appropriate action
