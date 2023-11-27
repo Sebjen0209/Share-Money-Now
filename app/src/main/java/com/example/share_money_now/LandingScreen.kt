@@ -1,7 +1,6 @@
 package com.example.share_money_now
 
 import FirebaseManager
-import PersonalGroupViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,7 +51,8 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
 
     Column(
         modifier = Modifier
-            .padding(16.dp),
+            .padding(16.dp)
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -63,7 +62,8 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
             contentDescription = "Logo",
             modifier = Modifier
                 .width(250.dp)
-                .height(200.dp)
+                .height(100.dp),
+
         )
         // User Name Button
         Button(
@@ -71,15 +71,16 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                 navController.navigate(Screen.UserScreen.route)
             },
             modifier = Modifier
-                .width(200.dp)
+                .fillMaxWidth()
                 .padding(bottom = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent)
         ) {
                 Text(
-                    text = userName.toString(),
+                    text = "Welcome " + userName.toString() + "!",
                     color = Color.Black,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
+                    fontSize = 30.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.height(50.dp)
 
                 )
         }
@@ -94,7 +95,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                 item {
                     var editableText by remember { mutableIntStateOf(100) }
                     val textColor =
-                        if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
+                        if (editableText < 0) Color.Red else if (editableText > 0) Color(0xFF006400) else Color.Black
                     Button(
                         onClick = {
                             val groupId = item.id
@@ -102,7 +103,7 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = 0.dp),
                         colors = ButtonDefaults.buttonColors(Color.Transparent)
                     ) {
                         Row(
@@ -116,20 +117,25 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                             Text(
                                 text = item.name + "    -  ",
                                 color = Color.Black,
-                                fontSize = 16.sp,
+                                fontSize = 20.sp,
                                 modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
                                 textAlign = TextAlign.Center
                             )
 
                             // Second Text with the value of "editableText" and different color
                             Text(
-                                text = editableText.toString(),
+                                text = "$editableText kr.",
                                 color = textColor,
-                                fontSize = 16.sp,
+                                fontSize = 20.sp,
                                 textAlign = TextAlign.Center
                             )
                         }
                     }
+                    Divider(
+                        color = Color.Gray,
+                        thickness = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -218,6 +224,19 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Add Group")
+            }
+            Button(
+                onClick = {
+                    // Reset necessary states and variables
+                    newGroupName = ""
+                    groupDescription = ""
+                    isAddingGroup = false
+                    isButtonClicked = false // Reset error message state if needed
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(Color(0xFFFF5A5F ))
+            ) {
+                Text(text = "Cancel")
             }
         }
     }
