@@ -17,31 +17,6 @@ class CreateGroupViewModel : ViewModel() {
 
     private val _groups = MutableLiveData<List<Group>>()
     val items: LiveData<List<Group>> get() = _groups
-
-    /*
-    fun getItemsById(groupOwnerId: String, personEmail: String) {
-        val query = databaseReference.getReference("groups").orderByChild("ownerId").equalTo(groupOwnerId)
-
-        query.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val groupList = mutableListOf<Group>()
-
-                for (itemSnapshot in snapshot.children) {
-                    val item = itemSnapshot.getValue(Group::class.java)
-                    item?.let { groupList.add(it) }
-                }
-
-                _groups.value = groupList
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the error
-            }
-        })
-    }
-
-     */
-
     fun getItemsByMember(personEmail: String) {
         val query = databaseReference.getReference("groups")
 
@@ -68,25 +43,21 @@ class CreateGroupViewModel : ViewModel() {
     }
 
     fun fetchNameForEmail(email: String, callback: (String?) -> Unit) {
-        // Assuming you have a "users" node in your database
+
         val usersReference = databaseReference.reference.child("persons")
 
-        // Query the users node to get the user with the specified email
         usersReference.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    // Get the first user (assuming email is unique)
                     val userSnapshot = snapshot.children.first()
                     val user = userSnapshot.getValue(Person::class.java)
                     callback(user?.name)
                 } else {
-                    // User not found
                     callback(null)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle errors, such as network issues or permission problems
                 error.toException().printStackTrace()
                 callback(null)
             }

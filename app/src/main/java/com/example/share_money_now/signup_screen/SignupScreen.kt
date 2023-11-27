@@ -49,8 +49,6 @@ fun SignupScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val state = viewModel.signUpState.collectAsState(initial = null)
 
     Column(
         modifier = Modifier
@@ -122,7 +120,6 @@ fun SignupScreen(
             Text(text = "Sign up")
         }
 
-        // Already have an account? Sign In
         Text(
             text = "Already have an account? Sign In",
             color = Color.Gray,
