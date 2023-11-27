@@ -1,5 +1,6 @@
 
 import com.example.share_money_now.data_classes.Group
+import com.example.share_money_now.data_classes.PaymentList
 import com.example.share_money_now.data_classes.Person
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -25,6 +26,16 @@ class FirebaseManager {
             .addOnFailureListener { e ->
                 e.printStackTrace()
             }
+    }
+
+    fun addPersonToGroup(groupId: String, person: Person) {
+        val groupReference = databaseReference.child("groups").child(groupId)
+        groupReference.child("members").push().setValue(person)
+    }
+
+    fun removePersonFromGroup(groupId: String, personId: String) {
+        val groupReference = databaseReference.child("groups").child(groupId).child("members").child(personId)
+        groupReference.removeValue()
     }
 
     fun addPersonOnSignUp(person: Person){

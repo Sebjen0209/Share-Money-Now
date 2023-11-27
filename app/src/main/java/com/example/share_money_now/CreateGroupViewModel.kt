@@ -17,6 +17,7 @@ class CreateGroupViewModel : ViewModel() {
 
     private val _groups = MutableLiveData<List<Group>>()
     val items: LiveData<List<Group>> get() = _groups
+
     fun getItemsByMember(personEmail: String) {
         val query = databaseReference.getReference("groups")
 
@@ -37,13 +38,11 @@ class CreateGroupViewModel : ViewModel() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle the error
             }
         })
     }
 
     fun fetchNameForEmail(email: String, callback: (String?) -> Unit) {
-
         val usersReference = databaseReference.reference.child("persons")
 
         usersReference.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object : ValueEventListener {

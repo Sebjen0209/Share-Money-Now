@@ -116,16 +116,14 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // First Text with the value of "group"
                             Text(
                                 text = item.name + "    -  ",
                                 color = Color.Black,
                                 fontSize = 20.sp,
-                                modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
+                                modifier = Modifier.padding(end = 8.dp),
                                 textAlign = TextAlign.Center
                             )
 
-                            // Second Text with the value of "editableText" and different color
                             Text(
                                 text = "$editableText kr.",
                                 color = textColor,
@@ -187,7 +185,6 @@ fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
-
             // Button to Confirm New Group
             Button(
                 onClick = {

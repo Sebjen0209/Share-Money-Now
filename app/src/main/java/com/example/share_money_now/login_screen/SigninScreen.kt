@@ -41,7 +41,9 @@ fun SigninScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val state = viewModel.signInState.collectAsState(initial = null)
 
     Column(
         modifier = Modifier

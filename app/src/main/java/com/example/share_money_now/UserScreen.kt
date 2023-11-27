@@ -66,7 +66,6 @@ fun UserScreen(navController: NavController) {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (isEditing) {
-                    // Editable TextField for Name
                     OutlinedTextField(
                         value = userName ?: "",
                         onValueChange = { userName = it },
@@ -144,6 +143,7 @@ fun UserScreen(navController: NavController) {
                 checked = newDebtUpdatesEnabled,
                 onCheckedChange = {
                     newDebtUpdatesEnabled = it
+                    // Handle switch state change for New Debt Updates
                 }
             )
         }
@@ -160,6 +160,7 @@ fun UserScreen(navController: NavController) {
                 checked = groupUpdatesEnabled,
                 onCheckedChange = {
                     groupUpdatesEnabled = it
+                    // Handle switch state change for Group Updates
                 }
             )
         }

@@ -73,14 +73,18 @@ fun GroupScreen(navController: NavController,
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var showDialogExpense by remember { mutableStateOf(false) }
+    var showDialogPay by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf<Double?>(null) }
     var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var paidAmountMap: Map<String, Double> = emptyMap()
     var group by remember { mutableStateOf(Group()) }
     var cleanEmail = FirebaseAuth.getInstance().currentUser?.email?.replace(".", "")
     var mail by remember { mutableStateOf("") }
+    var paymentAmount by remember { mutableStateOf(0.0) }
+    val gId = groupId.toString()
     val keyboardController = LocalSoftwareKeyboardController.current
     val personalGroupViewModel = viewModel<PersonalGroupViewModel>()
+    val groupState by personalGroupViewModel.group.collectAsState()
     var debt by remember { mutableStateOf(0.0) }
 
     if (!groupId.isNullOrBlank()) {
@@ -88,7 +92,7 @@ fun GroupScreen(navController: NavController,
             if (firebaseGroupId != null) {
                 personalGroupViewModel.fetchGroupDetails(firebaseGroupId) { fetchedGroup ->
                     if (fetchedGroup != null) {
-                        group = fetchedGroup // Update the 'group' variable with fetched data
+                        group = fetchedGroup
 
                         participants = fetchedGroup.members.map { it?.name ?: "" }
 
@@ -98,8 +102,10 @@ fun GroupScreen(navController: NavController,
 
                         personalGroupViewModel.setGroup(fetchedGroup)
 
+                    } else {
                     }
                 }
+            } else {
             }
         }
     }
@@ -122,8 +128,12 @@ fun GroupScreen(navController: NavController,
 
                             personalGroupViewModel.setGroup(fetchedGroup)
 
+                        } else {
+                            // Handle scenario when group data is null or not found
                         }
                     }
+                } else {
+                    // Handle scenario when groupId is not found
                 }
             }
         }
@@ -163,6 +173,7 @@ fun GroupScreen(navController: NavController,
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            // Total Amount
             Text(
                 text = "Total Amount: ",
                 modifier = Modifier
@@ -176,7 +187,7 @@ fun GroupScreen(navController: NavController,
                     .wrapContentSize(Alignment.Center)
             )
 
-            // Lists the participants
+            // Participants
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -203,6 +214,7 @@ fun GroupScreen(navController: NavController,
                             .padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        // Participant Details
                         Column {
                             Text(text = participants.getOrNull(index) ?: "")
                             Text(text = "$debt" )
@@ -215,11 +227,16 @@ fun GroupScreen(navController: NavController,
                                 group.members.indexOfFirst { it?.name ?: "" == emailToRemove }
 
                             if (indexToRemove != -1) {
+                                // Email is registered and found in the members list
+                                // Remove the Person from the members list
                                 val updatedMembers = group.members.toMutableList().apply {
                                     removeAt(indexToRemove)
                                 }
+
+                                // Update the group with the modified members list
                                 group = group.copy(members = updatedMembers)
 
+                                // Update the group in the Firebase Realtime Database
                                 personalGroupViewModel.updateGroupInFirebase(group)
 
                                 participants = group.members.map { it?.name ?: "" }
@@ -271,6 +288,7 @@ fun GroupScreen(navController: NavController,
                             OutlinedTextField(
                                 value = expenseValue.toString(),
                                 onValueChange = {
+                                    // Handle the case where the input is not a valid double
                                     expenseValue = it.toDoubleOrNull() ?: 0.0
                                 },
                                 label = { Text("Expense Amount") },
@@ -290,6 +308,7 @@ fun GroupScreen(navController: NavController,
                             ) {
                                 TextButton(
                                     onClick = {
+                                        // Dismiss the dialog without processing the input
                                         showDialogExpense = false
                                     }
                                 ) {
@@ -311,6 +330,7 @@ fun GroupScreen(navController: NavController,
                                             }
                                             group = group.copy(paidAmount = updatedPaidAmount)
 
+                                            // Reset the paymentAmount and dismiss the dialog
                                             expenseValue = 0.0
                                             showDialogExpense = false
 
@@ -435,6 +455,7 @@ fun GroupScreen(navController: NavController,
                 Dialog(
                     onDismissRequest = {
                         showDialog = false
+                        // Hide the keyboard when the dialog is dismissed
                         keyboardController?.hide()
                     },
                     content = {
@@ -483,6 +504,7 @@ fun GroupScreen(navController: NavController,
                                 TextButton(
                                     onClick = {
                                         showDialog = false
+                                        // Hide the keyboard when the "Cancel" button is clicked
                                         keyboardController?.hide()
                                     }
                                 ) {
@@ -497,33 +519,43 @@ fun GroupScreen(navController: NavController,
 
                                         personalGroupViewModel.checkIfEmailExistsInFirebase(emailToAdd) { isEmailRegistered ->
                                             if (isEmailRegistered) {
+                                                // Email is registered, add the participant
                                                 participants = participants.toMutableList().apply {
                                                     add(emailToAdd)
                                                 }
 
+                                                // Fetch the associated name for the emailToAdd from the database
                                                 personalGroupViewModel.fetchNameForEmail(emailToAdd) { associatedName ->
                                                     if (associatedName != null) {
+                                                        // Use the associated name when creating the new Person
                                                         val newPerson = Person(emailToAdd, associatedName)
                                                         group = group.copy(members = group.members + newPerson)
 
                                                         val updatedPaidAmount = group.paidAmount.toMutableMap().apply {
-                                                            put((emailToAdd.toString()).replace(".",""), 0.0)
+                                                            put((emailToAdd.toString()).replace(".",""), 0.0)  // Assuming you want to initialize the new user with 0.0 paidAmount
                                                         }
 
                                                         group = group.copy(paidAmount = updatedPaidAmount)
 
+
+                                                        // Update the group in the Firebase Realtime Database
                                                         personalGroupViewModel.updateGroupInFirebase(group)
 
+                                                        // Update participants with the names of the current members
                                                         participants = group.members.map { it?.name ?: "" }
 
                                                         showDialog = false
-
+                                                        // Hide the keyboard when the "Add" button is clicked
                                                         keyboardController?.hide()
                                                     } else {
+                                                        // Handle the scenario when the associated name is not found
                                                         println("Associated name not found for the email: $emailToAdd")
                                                     }
                                                 }
                                             } else {
+                                                // Handle the scenario when the email is not registered
+                                                // You might want to display an error message or take appropriate action
+                                                // For now, let's just print a message
                                                 println("Email is not registered in Firebase.")
                                             }
                                         }

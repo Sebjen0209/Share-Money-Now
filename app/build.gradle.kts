@@ -22,6 +22,7 @@ android {
             useSupportLibrary = true
         }
 
+        // Add the following block if it's not already present
         buildFeatures {
             dataBinding = true
         }

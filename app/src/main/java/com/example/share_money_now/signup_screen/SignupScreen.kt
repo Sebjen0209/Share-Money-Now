@@ -49,6 +49,8 @@ fun SignupScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val state = viewModel.signUpState.collectAsState(initial = null)
 
     Column(
         modifier = Modifier
