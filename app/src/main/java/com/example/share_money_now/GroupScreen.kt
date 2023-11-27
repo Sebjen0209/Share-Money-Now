@@ -92,7 +92,7 @@ fun GroupScreen(navController: NavController,
             if (firebaseGroupId != null) {
                 personalGroupViewModel.fetchGroupDetails(firebaseGroupId) { fetchedGroup ->
                     if (fetchedGroup != null) {
-                        group = fetchedGroup // Update the 'group' variable with fetched data
+                        group = fetchedGroup
 
                         participants = fetchedGroup.members.map { it?.name ?: "" }
 
@@ -103,11 +103,9 @@ fun GroupScreen(navController: NavController,
                         personalGroupViewModel.setGroup(fetchedGroup)
 
                     } else {
-                        // Handle scenario when group data is null or not found
                     }
                 }
             } else {
-                // Handle scenario when groupId is not found
             }
         }
     }

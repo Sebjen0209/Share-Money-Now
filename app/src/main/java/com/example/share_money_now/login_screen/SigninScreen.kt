@@ -105,7 +105,6 @@ fun SigninScreen(
             Text(text = "Sign In")
         }
 
-        // Don't have an account? Sign Up
         Text(
             text = "Don't have an account? Sign Up",
             color = Color.Gray,

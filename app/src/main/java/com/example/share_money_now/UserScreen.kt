@@ -31,10 +31,8 @@ import java.io.Console
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(navController: NavController) {
-    // Retrieve user information from Firebase
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
     var userEmail by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.email) }
-    var userPassword by remember { mutableStateOf("********") }
     var newDebtUpdatesEnabled by remember { mutableStateOf(true) }
     var groupUpdatesEnabled by remember { mutableStateOf(true) }
     var isEditing by remember { mutableStateOf(false) }
@@ -66,10 +64,8 @@ fun UserScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left side (Labels or TextFields based on isEditing)
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (isEditing) {
-                    // Editable TextField for Name
                     OutlinedTextField(
                         value = userName ?: "",
                         onValueChange = { userName = it },
@@ -77,7 +73,6 @@ fun UserScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // Editable TextField for Email
                     OutlinedTextField(
                         value = userEmail ?: "",
                         onValueChange = { userEmail = it },
@@ -91,7 +86,6 @@ fun UserScreen(navController: NavController) {
                 }
             }
 
-            // Spacer
             Spacer(modifier = Modifier.width(16.dp))
         }
 
@@ -199,7 +193,6 @@ fun updateFirebaseUserInfo(newName: String, newEmail: String) {
     user?.updateProfile(profileUpdater)
         ?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                // Update email if provided
                 user.updateEmail(newEmail)
                     .addOnCompleteListener { emailTask ->
                         if (emailTask.isSuccessful) {

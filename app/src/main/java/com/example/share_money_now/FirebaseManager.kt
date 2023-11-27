@@ -11,26 +11,19 @@ import com.google.firebase.database.ValueEventListener
 class FirebaseManager {
     private val databaseReference: DatabaseReference
 
-    // Initialize Firebase with a specific database URL
     init {
-        //FirebaseDatabase.getInstance("https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app")
         databaseReference = FirebaseDatabase.getInstance("https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app").reference
     }
 
     fun createGroup(group: Group) {
-        // Get a reference to the "groups" node
         val groupsReference = databaseReference.child("groups")
 
-        // Use push() to generate a unique ID and get a reference to the new group node
         val groupReference = groupsReference.push()
 
-        // Set the value of the new group with the generated key
         groupReference.setValue(groupReference.key?.let { group.copy(id = it) })
             .addOnSuccessListener {
-                // Handle success
             }
             .addOnFailureListener { e ->
-                // Handle failure
                 e.printStackTrace()
             }
     }
