@@ -2,6 +2,7 @@ package com.example.share_money_now
 
 import FirebaseManager
 import PersonalGroupViewModel
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +53,13 @@ import com.example.share_money_now.data_classes.Group
 import com.example.share_money_now.data_classes.Payment
 import com.example.share_money_now.data_classes.Person
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.math.absoluteValue
+import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun GroupScreen(navController: NavController, groupId: String?,
+fun GroupScreen(navController: NavController,
+                groupId: String?,
                 firebaseManager: FirebaseManager,
                 viewModel: PersonalGroupViewModel = viewModel()
 ) {
@@ -61,30 +67,46 @@ fun GroupScreen(navController: NavController, groupId: String?,
     var participants by remember { mutableStateOf(listOf("")) }
     var showDialog by remember { mutableStateOf(false) }
     var showDialogExpense by remember { mutableStateOf(false) }
+    var showDialogPay by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf<Double?>(null) }
     var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
+    var paidAmountMap: Map<String, Double> = emptyMap()
     var group by remember { mutableStateOf(Group()) }
+    var cleanEmail = FirebaseAuth.getInstance().currentUser?.email?.replace(".", "")
+    var paymentAmount by remember { mutableStateOf(0.0) }
     val gId = groupId.toString()
+
 
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val personalGroupViewModel = viewModel<PersonalGroupViewModel>()
 
-    LaunchedEffect(Unit) {
-        personalGroupViewModel.findGroupByGroupId(gId) { firebaseGroupId ->
-            if (firebaseGroupId != null) {
-                personalGroupViewModel.fetchGroupDetails(firebaseGroupId) { fetchedGroup ->
-                    if (fetchedGroup != null) {
-                        group = fetchedGroup // Update the 'group' variable with fetched data
+    val groupState by personalGroupViewModel.group.collectAsState()
 
-                        participants = fetchedGroup.members.map { it?.name ?: "" }
-                    } else {
-                        // Handle scenario when group data is null or not found
+    // LaunchedEffect for fetching group details
+    LaunchedEffect(groupId) {
+        if (!groupId.isNullOrBlank()) {
+            personalGroupViewModel.findGroupByGroupId(groupId) { firebaseGroupId ->
+                if (firebaseGroupId != null) {
+                    personalGroupViewModel.fetchGroupDetails(firebaseGroupId) { fetchedGroup ->
+                        if (fetchedGroup != null) {
+                            group = fetchedGroup // Update the 'group' variable with fetched data
+
+                            participants = fetchedGroup.members.map { it?.name ?: "" }
+
+                            totalAmount = fetchedGroup.totalAmount
+
+                            paidAmountMap = fetchedGroup.paidAmount
+
+                            personalGroupViewModel.setGroup(fetchedGroup)
+                        } else {
+                            // Handle scenario when group data is null or not found
+                        }
                     }
+                } else {
+                    // Handle scenario when groupId is not found
                 }
-            } else {
-                // Handle scenario when groupId is not found
             }
         }
     }
@@ -122,8 +144,8 @@ fun GroupScreen(navController: NavController, groupId: String?,
             Text(
                 text = "$totalAmount",
                 modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentSize(Alignment.Center)
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center)
             )
 
             // Participants
@@ -133,9 +155,56 @@ fun GroupScreen(navController: NavController, groupId: String?,
                     .weight(1f)
             ) {
                 items(participants.size) { index ->
+                    var debt = (totalAmount / participants.size) - (groupState?.paidAmount?.get(cleanEmail) ?: 0.0)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Participant Details
+                        Column {
+                            Text(text = participants.getOrNull(index) ?: "")
+                            Text(text = "$debt" )
+                        }
+
+                        // Remove Button
+                        Button(onClick = {
+                            val emailToRemove = participants.getOrNull(index) ?: ""
+                            val indexToRemove =
+                                group.members.indexOfFirst { it?.name ?: "" == emailToRemove }
+
+                            if (indexToRemove != -1) {
+                                // Email is registered and found in the members list
+                                // Remove the Person from the members list
+                                val updatedMembers = group.members.toMutableList().apply {
+                                    removeAt(indexToRemove)
+                                }
+
+                                // Update the group with the modified members list
+                                group = group.copy(members = updatedMembers)
+
+                                // Update the group in the Firebase Realtime Database
+                                personalGroupViewModel.updateGroupInFirebase(group)
+
+                                participants = group.members.map { it?.name ?: "" }
+                            }
+                        }
+
+                        ) {
+                            Text(text = "Remove")
+                        }
+                    }
+
+
+
+
+
+
+                    /*
                     ParticipantRow(
                         name = participants.getOrNull(index) ?: "",
-                        debt = 0.0, // Replace with actual debt value
+                        debt = ,
                         onRemoveClick = {
                             val emailToRemove = participants.getOrNull(index) ?: ""
                             val indexToRemove =
@@ -158,6 +227,8 @@ fun GroupScreen(navController: NavController, groupId: String?,
                             }
                         }
                     )
+
+                     */
                 }
             }
 
@@ -165,6 +236,8 @@ fun GroupScreen(navController: NavController, groupId: String?,
             Text(
                 text = "Description: ${group.description}",
             )
+
+            // View Group Expense Button
             Button(
                 onClick = {
                           navController.navigate(Screen.ExpensesScreen.route)
@@ -186,6 +259,7 @@ fun GroupScreen(navController: NavController, groupId: String?,
                 Text(text = "Edit")
             }
 
+            // Share group expenses Button
             Button(
                 onClick = {
                     showDialogExpense = true
@@ -197,10 +271,11 @@ fun GroupScreen(navController: NavController, groupId: String?,
                 Text(text = "Share Group Expense")
             }
 
+            // Dialog for Share Group Expenses
             if (showDialogExpense) {
                 Dialog(
                     onDismissRequest = {
-                        showDialog = false
+                        showDialogExpense = false
                     },
                     content = {
                         Column(
@@ -249,6 +324,22 @@ fun GroupScreen(navController: NavController, groupId: String?,
                                 TextButton(
                                     onClick = {
                                         totalAmount += expenseValue!!
+                                        group = group.copy(totalAmount = totalAmount)
+
+                                            val updatedPaidAmount = group.paidAmount.toMutableMap().apply {
+                                                val currentAmount = getOrDefault(cleanEmail, 0.0)
+                                                if (cleanEmail != null) {
+                                                    put(cleanEmail!!, currentAmount + expenseValue!!)
+                                                }
+                                            }
+                                            group = group.copy(paidAmount = updatedPaidAmount)
+
+                                            // Reset the paymentAmount and dismiss the dialog
+                                            expenseValue = 0.0
+                                            showDialogExpense = false
+
+                                        personalGroupViewModel.updateGroupInFirebase(group)
+
                                         showDialogExpense = false
                                     }
                                 ) {
@@ -260,13 +351,10 @@ fun GroupScreen(navController: NavController, groupId: String?,
                 )
             }
 
-            // Add People Button
-            var paymentAmount by remember { mutableStateOf(0.0) }
             // Pay Button
             Button(
                 onClick = {
-                    // Show a dialog or UI element to enter the payment amount
-                    showDialogExpense = true
+                    showDialogPay = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -284,10 +372,10 @@ fun GroupScreen(navController: NavController, groupId: String?,
 
 // Inside your composable function
 
-            if (showDialogExpense) {
+            if (showDialogPay) {
                 Dialog(
                     onDismissRequest = {
-                        showDialogExpense = false
+                        showDialogPay = false
                     },
                     content = {
                         Column(
@@ -325,7 +413,7 @@ fun GroupScreen(navController: NavController, groupId: String?,
                                 TextButton(
                                     onClick = {
                                         // Dismiss the dialog without processing the input
-                                        showDialogExpense = false
+                                        showDialogPay = false
                                     }
                                 ) {
                                     Text(text = "Cancel")
@@ -348,7 +436,7 @@ fun GroupScreen(navController: NavController, groupId: String?,
 
                                             // Reset the paymentAmount and dismiss the dialog
                                             paymentAmount = 0.0
-                                            showDialogExpense = false
+                                            showDialogPay = false
                                         }
                                     }
                                 ) {
@@ -358,6 +446,18 @@ fun GroupScreen(navController: NavController, groupId: String?,
                         }
                     }
                 )
+            }
+
+            // Add people Button
+            Button(
+                onClick = {
+                          showDialog = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(text = "Add people")
             }
 
             // Dialog for adding people
@@ -478,48 +578,6 @@ fun GroupScreen(navController: NavController, groupId: String?,
                     }
                 )
             }
-
-            // Pay Button
-            Button(
-                onClick = { /* Handle pay button click */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(text = "Pay My Part")
-                }
-            }
         }
     }
-}
-
-@Composable
-fun ParticipantRow(name: String, debt: Double, onRemoveClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Participant Details
-        Column {
-            Text(text = name)
-            Text(text = "Dept: $debt")
-        }
-
-        // Remove Button
-        Button(onClick = onRemoveClick) {
-            Text(text = "Remove")
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewGroupScreen() {
-    // Preview code here
 }

@@ -6,11 +6,23 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class PersonalGroupViewModel : ViewModel() {
     private val databaseReference: DatabaseReference =
         FirebaseDatabase.getInstance("https://share-money-now-default-rtdb.europe-west1.firebasedatabase.app").reference
 
+    // Use StateFlow to represent the group state
+    private val _group = MutableStateFlow<Group?>(null)
+    val group: StateFlow<Group?> = _group
+
+    // ...
+
+    // Set the group state using MutableStateFlow
+    fun setGroup(group: Group?) {
+        _group.value = group
+    }
     fun fetchGroupDetails(groupId: String, onDataReceived: (Group?) -> Unit) {
         val groupsRef = databaseReference.child("groups").child(groupId)
 
