@@ -1,5 +1,6 @@
 package com.example.share_money_now
 
+import FirebaseManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,10 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,30 +26,47 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.share_money_now.data_classes.Group
+import com.example.share_money_now.data_classes.Person
 import com.google.firebase.auth.FirebaseAuth
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LandingScreen(navController: NavController) {
+fun LandingScreen(navController: NavController, firebaseManager: FirebaseManager,
+                  viewModel: CreateGroupViewModel = viewModel()) {
     var userName by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.displayName) }
-    var groups by remember { mutableStateOf(listOf("Group 1")) }
     var newGroupName by remember { mutableStateOf("") }
     var isAddingGroup by remember { mutableStateOf(false) }
+    val groups by viewModel.items.observeAsState(emptyList())
+    var groupDescription by remember { mutableStateOf("") }
+
+    val CreateGroupViewModel = viewModel<CreateGroupViewModel>()
+
+    LaunchedEffect(Unit) {
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
+        currentUserEmail?.let { email ->
+            CreateGroupViewModel.getItemsByMember(email)
+        }
+    }
 
     Column(
         modifier = Modifier
-            .padding(16.dp),
+            .padding(16.dp)
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Logo
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.sharemoneynowlogo),
             contentDescription = "Logo",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+                .width(250.dp)
+                .height(100.dp),
+
         )
         // User Name Button
         Button(
@@ -55,15 +74,16 @@ fun LandingScreen(navController: NavController) {
                 navController.navigate(Screen.UserScreen.route)
             },
             modifier = Modifier
-                .width(200.dp)
+                .fillMaxWidth()
                 .padding(bottom = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent)
         ) {
                 Text(
-                    text = userName.toString(),
+                    text = "Welcome " + userName.toString() + "!",
                     color = Color.Black,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
+                    fontSize = 30.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.height(50.dp)
 
                 )
         }
@@ -74,43 +94,53 @@ fun LandingScreen(navController: NavController) {
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            items(groups) { group ->
-                var editableText by remember { mutableIntStateOf(100) }
-                val textColor =
-                    if (editableText < 0) Color.Red else if (editableText > 0) Color.Green else Color.Black
-                Button(
-                    onClick = {
-                        navController.navigate(Screen.GroupScreen.route)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    colors = ButtonDefaults.buttonColors(Color.Transparent)
-                ) {
-                    Row(
+            groups.forEach { item ->
+                item {
+                    var editableText by remember { mutableIntStateOf(100) }
+                    val textColor =
+                        if (editableText < 0) Color.Red else if (editableText > 0) Color(0xFF006400) else Color.Black
+                    Button(
+                        onClick = {
+                            val groupId = item.id
+                            navController.navigate("group_screen/$groupId")
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(bottom = 0.dp),
+                        colors = ButtonDefaults.buttonColors(Color.Transparent)
                     ) {
-                        Text(
-                            text = group + "    -  ",
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(end = 8.dp), // Adjust spacing as needed
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = editableText.toString(),
-                            color = textColor,
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = item.name + "    -  ",
+                                color = Color.Black,
+                                fontSize = 20.sp,
+                                modifier = Modifier.padding(end = 8.dp),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Text(
+                                text = "$editableText kr.",
+                                color = textColor,
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
+                    Divider(
+                        color = Color.Gray,
+                        thickness = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
+
 
         // Button to Add New Group
         if (!isAddingGroup) {
@@ -125,7 +155,6 @@ fun LandingScreen(navController: NavController) {
         }
         var isButtonClicked by remember { mutableStateOf(false) }
 
-        // Display error message if newGroupName is empty and the button is clicked
         if (newGroupName.isEmpty() && isButtonClicked) {
             Text(
                 text = "Please enter a group name",
@@ -148,22 +177,63 @@ fun LandingScreen(navController: NavController) {
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
-
+            OutlinedTextField(
+                value = groupDescription,
+                onValueChange = { groupDescription = it },
+                label = { Text("Group Description") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
             // Button to Confirm New Group
             Button(
                 onClick = {
-                    if (newGroupName.isNotEmpty()) {
-                        groups = groups + newGroupName
-                        newGroupName = ""
-                        isAddingGroup = false
-                        navController.navigate(Screen.GroupScreen.route)
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+
+                    if (currentUser != null) {
+                        CreateGroupViewModel.fetchNameForEmail(currentUser.email ?: "") { associatedName ->
+                            if (associatedName != null) {
+                                val group = Group(
+                                    UUID.randomUUID().toString(),
+                                    currentUser.email ?: "",
+                                    newGroupName,
+                                    listOf(Person(currentUser.email ?: "", associatedName)),
+                                    groupDescription,
+                                    0.0,
+                                    mapOf(((currentUser.email).toString()).replace(".","") to 0.0)
+                                )
+
+                                firebaseManager.createGroup(group)
+                                if (newGroupName.isNotEmpty()) {
+                                    newGroupName = ""
+                                    isAddingGroup = false
+                                    navController.navigate("group_screen/${group.id}")
+                                } else {
+                                    isButtonClicked = true
+                                }
+                            } else {
+                                println("Associated name not found for the logged-in user.")
+                            }
+                        }
                     } else {
-                        isButtonClicked = true
+                        println("Current user is null.")
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Add Group")
+            }
+            Button(
+                onClick = {
+                    newGroupName = ""
+                    groupDescription = ""
+                    isAddingGroup = false
+                    isButtonClicked = false
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(Color(0xFFFF5A5F ))
+            ) {
+                Text(text = "Cancel")
             }
         }
     }
