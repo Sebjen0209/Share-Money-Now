@@ -100,6 +100,10 @@ fun GroupScreen(navController: NavController,
 
                         paidAmountMap = fetchedGroup.paidAmount
 
+
+                        fetchedGroup.calculateDebts()
+
+
                         personalGroupViewModel.setGroup(fetchedGroup)
 
                     } else {
@@ -129,6 +133,8 @@ fun GroupScreen(navController: NavController,
                             paidAmountMap = fetchedGroup.paidAmount
 
                             personalGroupViewModel.setGroup(fetchedGroup)
+
+
 
                         } else {
                             // Handle scenario when group data is null or not found
