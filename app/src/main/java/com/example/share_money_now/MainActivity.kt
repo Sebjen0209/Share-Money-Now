@@ -1,37 +1,49 @@
 package com.example.share_money_now
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.google.firebase.FirebaseApp
 import com.example.share_money_now.ui.theme.ShareMoneyNowTheme
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
-import com.example.share_money_now.ui.theme.ShareMoneyNowTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this);
         super.onCreate(savedInstanceState)
         setContent {
             Navigation()
             ShareMoneyNowTheme {
-              FirebaseMessaging.getInstance().token
-                  .addOnCompleteListener(OnCompleteListener { task ->
-                      if (!task.isSuccessful) {
-                          Log.d("FCM", "Fetching FCM registration token failed", task.exception)
-                          return@OnCompleteListener
-                      }
-
-                      //Get new FCM registration token
-                      val token: String? = task.result
-                      Log.d("FCM Token", token, task.exception)
-                      //Toast.makeText(this, token, Toast.LENGTH_SHORT).show() --- DISPLAY TOKEN ONSCREEN
-                  })
+                FirebaseAuth.getInstance().currentUser?.let { user ->
+                    val uid = user.uid
+                    val email = user.email
+                    FirebaseMessaging.getInstance().token
+                        .addOnCompleteListener(OnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val token = task.result
+                                if (token != null && email != null) {
+                                    updateTokenInFirestore(uid, email, token)
+                                }
+                            }
+                        })
+                }
             }
         }
+    }
+    private fun updateTokenInFirestore(uid: String, email: String, token: String) {
+        val firestore = FirebaseFirestore.getInstance()
+        val userTokenMap = mapOf(
+            "notificationToken" to token,
+            "email" to email
+        )
+        firestore.collection("persons").document(uid)
+            .set(userTokenMap, SetOptions.merge())
     }
 }
