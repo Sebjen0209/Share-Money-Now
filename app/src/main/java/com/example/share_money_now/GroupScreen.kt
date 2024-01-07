@@ -56,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.share_money_now.data_classes.Group
 import com.example.share_money_now.data_classes.Person
+import com.example.share_money_now.data_classes.calculateDebts
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.absoluteValue
 import kotlin.math.exp
@@ -100,8 +101,7 @@ fun GroupScreen(navController: NavController,
 
                         paidAmountMap = fetchedGroup.paidAmount
 
-
-                        fetchedGroup.calculateDebts()
+                        group.calculateDebts()
 
 
                         personalGroupViewModel.setGroup(fetchedGroup)

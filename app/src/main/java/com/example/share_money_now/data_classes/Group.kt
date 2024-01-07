@@ -11,10 +11,10 @@ data class Group(
     val payments: List<Payment> = emptyList()
 )
 
-fun calculateDebts(group: Group): Map<Person?, Double> {
+fun Group.calculateDebts(): Map<Person?, Double> {
     val balances = mutableMapOf<Person?, Double>()
 
-    for (payment in group.payments) {
+    for (payment in payments) {
         val perPersonShare = payment.cost / payment.members.size
 
         balances[payment.payer] = balances.getOrDefault(payment.payer, 0.0) - payment.cost
